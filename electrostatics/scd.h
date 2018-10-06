@@ -5,13 +5,13 @@
 #include "externalfields.h"
 #include "particle/particlesystem.h"
 
-class SCD
+class SelfConsistentDipoles
 {
 public:
     double d;                               ///< Диаметр частицы
     ParticleSystem* system;
 
-    SCD(double _d, ParticleSystem* _system) :
+    SelfConsistentDipoles(double _d, ParticleSystem* _system) :
         d(_d), system(_system)
     {
 

@@ -28,6 +28,8 @@ struct Particle
 
     Vector getCoordinate();
 
+    Vector getVelocity();
+
     virtual Vector getElectricField(Vector _r) = 0;
 };
 
@@ -45,17 +47,7 @@ struct Dipoloid : Particle
         name = "dipoloid";
     }
 
-    Vector getElectricField(Vector _r)
-    {
-        if ((_r - state->r).norm() != 0.0)
-        {
-            return (3 * dipolemoment.dot((_r - state->r) / (_r - state->r).norm()) * ((_r - state->r) / (_r - state->r).norm()) - dipolemoment) / pow((_r - state->r).norm(), 3);
-        }
-        else
-        {
-            return Vector(0.0, 0.0, 0.0);
-        }
-    }
+    Vector getElectricField(Vector _r);
 };
 
 #endif // PARTICLE_H

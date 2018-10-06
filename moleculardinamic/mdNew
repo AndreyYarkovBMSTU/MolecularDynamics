@@ -1,0 +1,102 @@
+#ifndef MOLECULARDINAMIC_H
+#define MOLECULARDINAMIC_H
+
+#include "header.h"
+#include "particle/particlesystem.h"
+#include "numeralequations/numeralequations.h"
+
+class MolecularDinamic
+{
+    bool flag;
+public:
+    ParticleSystem* particlesystem;
+
+    MolecularDinamic(ParticleSystem* _particlesystem, std::string _type) :
+        particlesystem(_particlesystem)
+    {
+        flag = false;
+        if (type == "record") {
+            flag = true;
+        } 
+    }
+
+    void dump()
+    {
+        for (auto &iParticle : particlesystem->particles)
+        {
+            std::cout << iParticle->state->number << "\t";
+            std::cout << iParticle->name << std::endl;
+        }
+    }
+    
+    void computer(int _nParticle, Vector _rp_)
+    {
+        Verle* verle = new Verle(1.0);
+        
+        Vector f = Vector(-3 + std::rand() % 6, -3 + std::rand() % 6, -3 + std::rand() % 6);
+        Vector _r_ = particlesystem->particles[_nParticle]->state->r;
+        particlesystem->particles[_nParticle]->state->r = verle->getCoordinates(particlesystem->particles[_nParticle]->state->r, _rp_, f);
+        particlesystem->particles[_nParticle]->state->v = verle->getVelocity(particlesystem->particles[_nParticle]->state->r, _rp_, f);
+    }
+
+    void record()
+    {
+        Verle* verle = new Verle(1.0);
+        int frames = 100;
+        Vector r_[particlesystem->numParticles];
+        Vector rp_[particlesystem->numParticles];
+
+        for (int nParticle = 0; nParticle < particlesystem->numParticles; nParticle++)
+        {
+            rp_[nParticle] = particlesystem->particles[nParticle]->state->r;
+        }
+
+        std::string path = "output/time0.txt";
+        std::ofstream out;
+        out.open(path, std::ios::app);
+        for (int nParticle = 0; nParticle < particlesystem->numParticles; nParticle++)
+        {
+            out << particlesystem->particles[nParticle]->state;
+        }
+        out.close();
+
+        for (int i = 1; i < frames; i++)
+        {
+            std::string path = "output/time" + std::to_string(i) + ".txt";
+            std::ofstream out;
+            out.open(path, std::ios::app);
+            for (int nParticle = 0; nParticle < particlesystem->numParticles; nParticle++)
+            {
+                Vector f = Vector(-3 + std::rand() % 6, -3 + std::rand() % 6, -3 + std::rand() % 6);
+                r_[nParticle] = particlesystem->particles[nParticle]->state->r;
+                particlesystem->particles[nParticle]->state->r = verle->getCoordinates(particlesystem->particles[nParticle]->state->r, rp_[nParticle], f);
+                particlesystem->particles[nParticle]->state->v = verle->getVelocity(particlesystem->particles[nParticle]->state->r, rp_[nParticle], f);
+                rp_[nParticle] = r_[nParticle];
+                out << particlesystem->particles[nParticle]->state;
+            }
+            out.close();
+        }
+    }
+};
+
+#endif // MOLECULARDINAMIC_H
+
+
+//int frames = 100;
+//Eigen::Vector3d rad[nParticles][frames];
+//for (int nPart = 0; nPart < nParticles; nPart++)
+//{
+//    rad[nPart][0] = particles[nPart].r;
+//    rad[nPart][1] = particles[nPart].r;
+//}
+//double dt = 0.1;
+//for (int i = 2; i < frames; i++)
+//{
+//    ParticleInteraction PI(eps_p, eps_s, nParticles, particles, electricField);
+//    for (int nPart = 0; nPart < nParticles; nPart++)
+//    {
+//        particles[nPart].F = PI.ElectricForce(nPart);
+//        rad[nPart][i] = 2 * rad[nPart][i-1] - rad[nPart][i-2] + particles[nPart].F * dt * dt;
+//    }
+//}
+ 

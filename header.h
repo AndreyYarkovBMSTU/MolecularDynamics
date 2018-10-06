@@ -10,7 +10,6 @@
 #include "Eigen/Eigen"
 #include "namespase/phys.h"
 #include "namespase/mathematics.h"
-//#include "properties.h"
 
 using namespace phys;
 using namespace std;

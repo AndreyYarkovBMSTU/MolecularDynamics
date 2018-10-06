@@ -55,10 +55,7 @@ public:
             \phi = \biggl(\frac{2}{|(r1 - r2)| \cdot scale}\biggr)^{n}
        \f]
      */
-    double getPotential(Vector _r_1, Vector _r_2)
-    {
-        return pow(2.0 / ((_r_1 - _r_2).norm() * scale), n);
-    }
+    double getPotential(Vector _r_1, Vector _r_2);
 
     /*!
      * Получение градиента IPL потенциала взаимодействия
@@ -67,10 +64,7 @@ public:
             \nabla\phi = - n \cdot \phi \cdot \biggl(\frac{2}{|(r1 - r2)| \cdot scale}\biggr)^{2} \cdot (r1 - r2) \cdot scale
        \f]
      */
-    Vector getGradPotential(Vector _r_1, Vector _r_2)
-    {
-        return - n * getPotential(_r_1, _r_2) * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 2) * (_r_1 - _r_2) * scale;
-    }
+    Vector getGradPotential(Vector _r_1, Vector _r_2);
 };
 
 /*!
@@ -100,18 +94,7 @@ public:
             \phi = \biggl(\frac{2}{|(r1 - r2)| \cdot scale}\biggr)^{12} - \biggl(\frac{2}{|(r1 - r2)| \cdot scale}\biggr)^{6}
        \f]
      */
-    double getPotential(Vector _r_1, Vector _r_2)
-    {
-        if ((_r_1 - _r_2).norm() * scale < 2)
-        {
-            return pow(2.0 / ((_r_1 - _r_2).norm() * scale), 12);
-        }
-        else
-        {
-            return - pow(2.0 / ((_r_1 - _r_2).norm() * scale), 6);
-            //return 0;
-        }
-    }
+    double getPotential(Vector _r_1, Vector _r_2);
 
     /*!
      * Получение градиента потенциала взаимодействия Леннарда-Джонса
@@ -120,17 +103,7 @@ public:
             \nabla\phi = - 12 \cdot \phi \cdot \biggl(\frac{2}{|(r1 - r2)| \cdot scale}\biggr)^{2} \cdot (r1 - r2) \cdot scale + 6 \cdot \phi \cdot \biggl(\frac{2}{|(r1 - r2)| \cdot scale}\biggr)^{2} \cdot (r1 - r2) \cdot scale
        \f]
      */
-    Vector getGradPotential(Vector _r_1, Vector _r_2)
-    {
-        if ((_r_1 - _r_2).norm() * scale < 2)
-        {
-            return - 12 * getPotential(_r_1, _r_2) * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 2) * (_r_1 - _r_2) * scale;
-        }
-        else
-        {
-            return - 6 * getPotential(_r_1, _r_2) * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 2) * (_r_1 - _r_2) * scale;
-        }
-    }
+    Vector getGradPotential(Vector _r_1, Vector _r_2);
 };
 
 #endif // POTENTIAL_H

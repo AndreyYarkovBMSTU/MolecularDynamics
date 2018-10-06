@@ -11,8 +11,6 @@
 #include "properties.h"
 
 
-
-//*MAIN*//
 int main()
 {
     // Создание системы частиц.
@@ -39,8 +37,8 @@ int main()
     ExternalFields* externalfield = new RotatingField(prop, Vector(1e3, 0.0, 0.0), 30 * 1e3);
     Environment* environment = new Environment(solvent, externalfield);
 
-//    ParticleSystem* system = new ParticleSystem(environment, prop);
-//    system->setParticle(particle1);
+    ParticleSystem* system = new ParticleSystem(environment, prop);
+    system->setParticle(particle1);
 //    system->setParticle(particle2);
 //    system->setParticle(particle3);
 //    system->setParticle(particle4);
@@ -48,7 +46,7 @@ int main()
 
     // Расчёт
 
-//    Methods* method = new SCD(system, prop);
+    Methods* method = new SelfConsistentDipoles(system, prop);
 
     std::cout << externalfield->getElectricField(1) << std::endl;
     std::cout << externalfield1->getElectricField() << std::endl;

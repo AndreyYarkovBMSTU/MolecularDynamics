@@ -30,15 +30,15 @@ public:
      */
     friend std::ostream& operator <<(std::ostream& _flux, const State* _state)
     {
-    std::ios::fmtflags mode = _flux.flags();
-    _flux.setf(std::ios::fixed,std::ios::floatfield);
-    auto prec = _flux.precision(9);
+        std::ios::fmtflags mode = _flux.flags();
+        _flux.setf(std::ios::fixed,std::ios::floatfield);
+        auto prec = _flux.precision(9);
 
-    _flux << _state->number << " " << _state->r(0)  << " " << _state->r(1) << " " << _state->r(2) << " " << _state->v(0)  << " " << _state->v(1) << " " << _state->v(2) << "\n";
+        _flux << _state->number << " " << _state->r(0)  << " " << _state->r(1) << " " << _state->r(2) << " " << _state->v(0)  << " " << _state->v(1) << " " << _state->v(2) << "\n";
 
-    _flux.precision(prec);
-    _flux.setf(mode,std::ios::floatfield);
-    return _flux;
+        _flux.precision(prec);
+        _flux.setf(mode,std::ios::floatfield);
+        return _flux;
     }
 };
 
