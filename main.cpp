@@ -11,6 +11,8 @@
 #include "properties.h"
 
 
+
+//*MAIN*//
 int main()
 {
     // Создание системы частиц.
