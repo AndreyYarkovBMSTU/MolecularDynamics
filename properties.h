@@ -20,7 +20,7 @@ public:
     double prandtlEl;                        ///< Электрическое число Прандтля
     double schmidt;                         ///< Число Шмидта
     double knudsen;                         ///< Число Кнудсена
-    double koef_LenJon;
+    double koef_LenJon = 1e-9;
     Material* particlematerial;             ///< Материал частиц
     Material* solvent;                      ///< Материал среды
     std::string path = "output/time/";       ///< Путь к файлу

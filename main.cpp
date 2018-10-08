@@ -51,15 +51,16 @@ int main()
     method->setDipoleMoment();
     std::cout << system->particles[0]->dipolemoment;
 
-//    MolecularDinamic* moleculardinamic = new MolecularDinamic(system,
-//                                                              method,
-//                                                              prop,
-//                                                              "langevin",
-//                                                              "verle",
-//                                                              "LJ");
+    MolecularDinamic* moleculardinamic = new MolecularDinamic(system,
+                                                              method,
+                                                              prop,
+                                                              "langevin",
+                                                              "verle",
+                                                              "LJ");
 
 //    moleculardinamic->record();
-//    moleculardinamic->computer(2, 1000);
+
+    moleculardinamic->computer(2, 1000);
 
 //    for (auto &iParticle : particlesystem->particles)
 //    {

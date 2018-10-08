@@ -11,7 +11,7 @@ void NonIteractingDipoles::setDipoleMoment()
 
 Matrix SelfConsistentDipoles::getBlock(Particle* particle1, Particle* particle2)
 {
-    Matrix block(3, 3);
+    Block.resize(3, 3);
     n_ab = (particle1->getCoordinate() - particle2->getCoordinate()) / (particle1->getCoordinate() - particle2->getCoordinate()).norm();
     kronec_ab = mathematics::getKronec(particle1->state->number, particle2->state->number);
 
@@ -23,22 +23,22 @@ Matrix SelfConsistentDipoles::getBlock(Particle* particle1, Particle* particle2)
 
             if (kronec_ab == 1)
             {
-                block(i, j) = 0;
+                Block(i, j) = 0;
             }
             else
             {
-                block(i, j) = (3 * n_ab(i) * n_ab(j) - kronec_ij) * (1 - kronec_ab) / pow((particle1->getCoordinate() - particle2->getCoordinate()).norm(), 3);
+                Block(i, j) = (3 * n_ab(i) * n_ab(j) - kronec_ij) * (1 - kronec_ab) / pow((particle1->getCoordinate() - particle2->getCoordinate()).norm(), 3);
             }
         }
     }
 
-    return block;
+    return Block;
 }
 
 Matrix SelfConsistentDipoles::getInteractionsMatrix()
 {
-    Matrix B[system->numParticles * system->numParticles];
-    Matrix block_Matrix(3 * system->numParticles, 3 * system->numParticles);
+    B.resize(system->numParticles * system->numParticles);
+    Block_Matrix.resize(3 * system->numParticles, 3 * system->numParticles);
 
     for (int t = 0; t < system->numParticles * system->numParticles; t++)
     {
@@ -52,30 +52,30 @@ Matrix SelfConsistentDipoles::getInteractionsMatrix()
         for (int j  = 0; j < 3 * system->numParticles; j++)
         {
             k = system->numParticles * (i  / 3) + j / 3;
-            block_Matrix(i, j) = B[k](i % 3, j % 3);
+            Block_Matrix(i, j) = B[k](i % 3, j % 3);
         }
     }
 
-    return ((8.0 / (prop->ksi * pow(prop->radius * 2, 3)))) * mathematics::getUnitMatrix(3 * system->numParticles) - block_Matrix;
+    return ((8.0 / (prop->ksi * pow(prop->radius * 2, 3)))) * mathematics::getUnitMatrix(3 * system->numParticles) - Block_Matrix;
 }
 
 void SelfConsistentDipoles::setDipoleMoment()
 {
-    Matrix E(3 * system->numParticles, 1);
-    Matrix dipolemoment(E.rows(), 1);
+    E.resize(3 * system->numParticles, 1);
+    Dipolemoment.resize(E.rows(), 1);
 
     for (int i = 0; i < 3 * system->numParticles; i++)
     {
         E(i, 0) = system->environment->externalfield->electricfield(i % 3);
     }
-    dipolemoment = getInteractionsMatrix().ldlt().solve(E);
+    Dipolemoment = getInteractionsMatrix().ldlt().solve(E);
 
     k = 0;
     for (int i = 0; i < system->numParticles; i++)
     {
         for(int j = 0; j < 3; j++)
         {
-            system->particles[i]->dipolemoment(j) = dipolemoment(k);
+            system->particles[i]->dipolemoment(j) = Dipolemoment(k);
             k++;
         }
     }

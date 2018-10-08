@@ -14,14 +14,14 @@ double Interaction::getGradEnergy(int _nParticle, int _nCoord)
 Vector Interaction::getElectricForce(int _nParticle)
 {
     method->setDipoleMoment();
-    r_ = system->particles[_nParticle]->state->r;
+    r_ = system->particles[_nParticle]->getCoordinate();
 
     return Vector(- getGradEnergy(_nParticle, 0), - getGradEnergy(_nParticle, 1), 0.0);
 }
 
 void Interaction::recordPotentials(int _numPoints, std::string _energytype)
 {
-    r_ = system->particles[1]->state->r;
+    r_ = system->particles[1]->getCoordinate();
     path0 = prop->path + "Self" + prop->filetype;
     out0.open(path0, std::ios::out | std::ios::binary);
     out0 << system->dipolemoment0.dot(system->dipolemoment0) / (4 * pow(2 * prop->radius, 3));
@@ -31,11 +31,11 @@ void Interaction::recordPotentials(int _numPoints, std::string _energytype)
         method->setDipoleMoment();
         if (i < 10)
         {
-            system->particles[1]->state->r(0) = pow(10, log10(2.01 + i * 0.01));
+            system->particles[1]->setCoordinate(Vector(pow(10, log10(2.01 + i * 0.01)), r_(1), r_(2)));
         }
         else
         {
-            system->particles[1]->state->r(0) = pow(10, log10(2.1 + (i - 10) * 0.1)); // 2.5304
+            system->particles[1]->setCoordinate(Vector(pow(10, log10(2.1 + (i - 10) * 0.1)),  r_(1), r_(2))); // 2.5304
         }
 
         path = prop->path + _energytype + "Average" + std::to_string(i) + prop->filetype;
@@ -43,11 +43,11 @@ void Interaction::recordPotentials(int _numPoints, std::string _energytype)
         out << system->particles[1]->getCoordinate()(0) / (2 * prop->radius) << " " << getAverageEnergy(0, _energytype);
         out.close();
 
-        if (system->particles[1]->state->r(0) / (2 * prop->radius) >= 10.0)
+        if (system->particles[1]->getCoordinate()(0) / (2 * prop->radius) >= 10.0)
         {
-            system->particles[1]->state->r(0) = 1e10;
+            system->particles[1]->setCoordinate(Vector(1e10, r_(1), r_(2)));
             std::cout << _energytype << " " << getAverageEnergy(1, _energytype) << std::endl;
-            system->particles[1]->state->r = r_;
+            system->particles[1]->setCoordinate(r_);
             break;
         }
         //system->particles[1]->state->r(0) += 10.0 *  2 * prop->radius / _numPoints;
@@ -69,7 +69,6 @@ void Interaction::recordEnergy(int _nParticle, std::string _energytype)
             method->setDipoleMoment();
 
             path = prop->path + _energytype + std::to_string(i) + prop->filetype;
-            std::ofstream out;
             out.open(path, std::ios::out | std::ios::binary);
             if (_energytype == "induction")
             {

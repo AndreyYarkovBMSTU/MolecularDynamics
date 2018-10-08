@@ -42,6 +42,11 @@ private:
     double kronec_ab;
     double kronec_ij;
     Vector n_ab;
+    Matrix Block;
+    Matrix Block_Matrix;
+    vector<Matrix> B;
+    Matrix E;
+    Matrix Dipolemoment;
 public:
     SelfConsistentDipoles(ParticleSystem* _system, Properties* _prop) :
         Methods(_system, _prop)

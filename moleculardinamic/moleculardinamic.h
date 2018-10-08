@@ -19,11 +19,15 @@ class MolecularDinamic
 {
 private:
     int k;
+    double rad;
     Vector f;
     Vector f_;
     Vector f_therm;
     Vector f_LenJon;
     Vector f_dipole;
+    Matrix R_;
+    vector<Vector> r_;            // Радиус-вектор частицы в настоящий момент времени
+    vector<Vector> rp_;           // Радиус-вектор частицы в предыдущий момент времени
     std::string path;
     std::ofstream out;
     const char * c;
@@ -66,7 +70,7 @@ public:
     /*!
      * Расситывает и выводит на экран состояние определённой частицы на определённом кадре
      */
-//    void computer(int _nParticle, int _nFrame);
+    void computer(int _nParticle, int _nFrame);
 
     /*!
      * Расcчитывает и записывает в файл конфигурацию системы в последующие моменты времени
