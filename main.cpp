@@ -20,7 +20,7 @@ int main()
     Properties* prop = new Properties(particlematerial, solvent);
 
     State* state1 = new State(1, Vector(-2.0, 1.0, 0.0) * phys::um() * 10.0, Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
-//    State* state2 = new State(2, Vector(2.0, -1.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
+    State* state2 = new State(2, Vector(2.0, -1.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
 //    State* state1 = new State(1, Vector(-4.0, -2.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
 //    State* state2 = new State(2, Vector(1.0, -4.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
 //    State* state3 = new State(3, Vector(2.0, 4.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
@@ -28,18 +28,18 @@ int main()
 //    State* state5 = new State(3, Vector(-4.0, 1.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
 
     Particle* particle1 = new Dipoloid(state1, particlematerial);
-//    Particle* particle2 = new Dipoloid(state2, particlematerial);
+    Particle* particle2 = new Dipoloid(state2, particlematerial);
 //    Particle* particle3 = new Dipoloid(state3, particlematerial);
 //    Particle* particle4 = new Dipoloid(state4, particlematerial);
 //    Particle* particle5 = new Dipoloid(state5, particlematerial);
 
-    ExternalFields* externalfield1 = new DirectedField(prop, Vector(1e3, 0.0, 0.0));
+    //ExternalFields* externalfield = new DirectedField(prop, Vector(1e3, 0.0, 0.0));
     ExternalFields* externalfield = new RotatingField(prop, Vector(1e3, 0.0, 0.0), 30 * 1e3);
     Environment* environment = new Environment(solvent, externalfield);
 
     ParticleSystem* system = new ParticleSystem(environment, prop);
     system->setParticle(particle1);
-//    system->setParticle(particle2);
+    system->setParticle(particle2);
 //    system->setParticle(particle3);
 //    system->setParticle(particle4);
 //    system->setParticle(particle5);
@@ -48,8 +48,8 @@ int main()
 
     Methods* method = new SelfConsistentDipoles(system, prop);
 
-    std::cout << externalfield->getElectricField(1) << std::endl;
-    std::cout << externalfield1->getElectricField() << std::endl;
+    method->setDipoleMoment();
+    std::cout << system->particles[0]->dipolemoment;
 
 //    MolecularDinamic* moleculardinamic = new MolecularDinamic(system,
 //                                                              method,

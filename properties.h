@@ -14,11 +14,13 @@ public:
     double k = 1.38e-23 * phys::J() / phys::K();        ///< Постоянная Больцмана
     double radius = 1.0 * phys::um();             ///< Радиус частицы
     double epsilon0 = 8.85 * 1e-12;             ///< Электрическая постоянная
+    double ksi;                              ///< Фактор Клаузиуса-Моссотти
     double mass;                            ///< Масса частицы
     double prandtl;                         ///< Число Прандтля
     double prandtlEl;                        ///< Электрическое число Прандтля
     double schmidt;                         ///< Число Шмидта
     double knudsen;                         ///< Число Кнудсена
+    double koef_LenJon;
     Material* particlematerial;             ///< Материал частиц
     Material* solvent;                      ///< Материал среды
     std::string path = "output/time/";       ///< Путь к файлу
@@ -35,6 +37,8 @@ public:
         particlematerial(_particlematerial), solvent(_solvent)
     {
         mass = _particlematerial->density * 4/3 * M_PI * pow(radius, 3) * phys::kg();
+
+        ksi = phys::getClausiusMossotti(particlematerial->epsilon, solvent->epsilon);
 
         double friction = 6.0 * M_PI * radius * _solvent->viscosity;
         double diffusion = k * temperature / friction;

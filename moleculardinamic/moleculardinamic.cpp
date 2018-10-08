@@ -110,8 +110,7 @@ void MolecularDinamic::record()
         rp_[nParticle] = system->particles[nParticle]->state->r;
     }
 
-    std::string path = prop->path + std::to_string(0) + prop->filetype;
-    std::ofstream out;
+    path = prop->path + std::to_string(0) + prop->filetype;
     out.open(path, std::ios::out | std::ios::binary);
     for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
     {
@@ -122,79 +121,72 @@ void MolecularDinamic::record()
     srand(time(NULL));
     for (int i = 1; i < prop->numFrames; i++)
     {
-//            int k = (0.016 / prop->timestep * 1e-4);            // проверка для записи определённых файлов
-        int k = 1;
-//      ERROR!!!!!
-        if (system->environment->externalfield->omega != 0.0)
-        {
-            system->environment->externalfield->electricfield = Vector(system->environment->externalfield->electricfield.norm() * cos(i * system->environment->externalfield->omega * prop->timestep),
-                                                                       system->environment->externalfield->electricfield.norm() * sin(i * system->environment->externalfield->omega * prop->timestep),
-                                                                       0.0);
-        }
+//            k = (0.016 / prop->timestep * 1e-4);            // проверка для записи определённых файлов
+        k = 1;
+        system->environment->externalfield->electricfield = system->environment->externalfield->getElectricField(i);
 
-        std::string path = prop->path + std::to_string(i) + prop->filetype;
-        std::ofstream out;
+        path = prop->path + std::to_string(i) + prop->filetype;
         out.open(path, std::ios::out | std::ios::binary);
 
         Matrix rad_vectors(system->numParticles, 3);
         for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
         {
-            rad_vectors(nParticle, 0) = system->particles[nParticle]->state->r(0);
-            rad_vectors(nParticle, 1) = system->particles[nParticle]->state->r(1);
-            rad_vectors(nParticle, 2) = system->particles[nParticle]->state->r(2);
+            rad_vectors(nParticle, 0) = system->particles[nParticle]->getCoordinate()(0);
+            rad_vectors(nParticle, 1) = system->particles[nParticle]->getCoordinate()(1);
+            rad_vectors(nParticle, 2) = system->particles[nParticle]->getCoordinate()(2);
         }
 
-        Vector f = Vector(0.0, 0.0, 0.0);
+        f = Vector(0.0, 0.0, 0.0);
         // Расчёт координат частицы
         for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
         {
 //                Vector f_therm = thermostat->getForce(system->particles[nParticle]->state->v);
-            Vector f_therm = Vector(0.0, 0.0, 0.0);
-            Vector f_LenJon = Vector(0.0, 0.0, 0.0);
-            Vector f_dipole = Vector(0.0, 0.0, 0.0);
+            f_therm = Vector(0.0, 0.0, 0.0);
+            f_LenJon = Vector(0.0, 0.0, 0.0);
+            f_dipole = Vector(0.0, 0.0, 0.0);
             for (int j = 0; j < system->numParticles; j++)
             {
                 if (j != nParticle)
                 {
                     //      ERROR!!!!!
                     f_LenJon += - potential->getGradPotential(Vector(rad_vectors(nParticle, 0), rad_vectors(nParticle, 1), rad_vectors(nParticle, 2)),
-                                                              Vector(rad_vectors(j, 0), rad_vectors(j, 1), rad_vectors(j, 2))) * 1e-9;
+                                                              Vector(rad_vectors(j, 0), rad_vectors(j, 1), rad_vectors(j, 2))) * prop->koef_LenJon;
 //                        if ((system->particles[nParticle]->state->r - system->particles[j]->state->r).norm() > 2 * prop->radius)
 //                        {
 //                            f_dipole += interaction->getElectricForce(nParticle);
 //                        }
                 }
             }
-            f = - prop->prandtl * (system->particles[nParticle]->state->v + (f_dipole / prop->prandtlEl) - pow(2.0, 0.5) * prop->knudsen * thermostat->getForce()) * prop->mass;
+            f = - prop->prandtl * (system->particles[nParticle]->getVelocity() + (f_dipole / prop->prandtlEl) - pow(2.0, 0.5) * prop->knudsen * thermostat->getForce()) * prop->mass;
             //Vector f = f_therm + f_LenJon + f_dipole;
-            r_[nParticle] = system->particles[nParticle]->state->r;
-            system->particles[nParticle]->state->r = numEq->getCoordinates(system->particles[nParticle]->state->r, rp_[nParticle], f, prop->mass);
+            r_[nParticle] = system->particles[nParticle]->getCoordinate();
+            system->particles[nParticle]->state->r = numEq->getCoordinates(system->particles[nParticle]->getCoordinate(), rp_[nParticle], f, prop->mass);
 
-            rad_vectors(nParticle, 0) = system->particles[nParticle]->state->r(0);
-            rad_vectors(nParticle, 1) = system->particles[nParticle]->state->r(1);
-            rad_vectors(nParticle, 2) = system->particles[nParticle]->state->r(2);
+            rad_vectors(nParticle, 0) = system->particles[nParticle]->getCoordinate()(0);
+            rad_vectors(nParticle, 1) = system->particles[nParticle]->getCoordinate()(1);
+            rad_vectors(nParticle, 2) = system->particles[nParticle]->getCoordinate()(2);
         }
 
         // Расчёт скорости частицы
         for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
         {
 //                Vector f_therm_for_verle = thermostat->getForce(system->particles[nParticle]->state->v);
-            Vector f_LenJon_for_numeq = Vector(0.0, 0.0, 0.0);
-            Vector f_dipole_for_numeq = Vector(0.0, 0.0, 0.0);
+            f_LenJon = Vector(0.0, 0.0, 0.0);
+            f_dipole = Vector(0.0, 0.0, 0.0);
             for (int j = 0; j < system->numParticles; j++)
             {
                 if (j != nParticle)
                 {
-                    f_LenJon_for_numeq += - potential->getGradPotential(Vector(rad_vectors(nParticle, 0), rad_vectors(nParticle, 1), rad_vectors(nParticle, 2)),
-                                                              Vector(rad_vectors(j, 0), rad_vectors(j, 1), rad_vectors(j, 2))) * 1e-9;
+                    f_LenJon += - potential->getGradPotential(Vector(rad_vectors(nParticle, 0), rad_vectors(nParticle, 1), rad_vectors(nParticle, 2)),
+                                                              Vector(rad_vectors(j, 0), rad_vectors(j, 1), rad_vectors(j, 2))) * prop->koef_LenJon;
                     //                        if ((system->particles[nParticle]->state->r - system->particles[j]->state->r).norm() > 2 * prop->radius)
                     //                        {
                     //                            f_dipole_for_numeq += interaction->getElectricForce(nParticle);
                     //                        }
                 }
             }
-            Vector f_for_numeq = - prop->prandtl * (system->particles[nParticle]->state->v + f_dipole_for_numeq / prop->prandtlEl - pow(2.0, 0.5) * prop->knudsen * thermostat->getForce()) * prop->mass;
-            system->particles[nParticle]->state->v = numEq->getVelocity(system->particles[nParticle]->state->v, f_for_numeq, f, prop->mass);
+            f_ = - prop->prandtl * (system->particles[nParticle]->getVelocity() + f_dipole / prop->prandtlEl - pow(2.0, 0.5) * prop->knudsen * thermostat->getForce()) * prop->mass;
+            system->particles[nParticle]->state->v = numEq->getVelocity(system->particles[nParticle]->getVelocity(), f_, f, prop->mass);
             rp_[nParticle] = r_[nParticle];
 
             if (bool(i % k == 0))
@@ -203,8 +195,8 @@ void MolecularDinamic::record()
             }
             else
             {
-                std::string path = prop->path + std::to_string(i) + prop->filetype;
-                const char * c = path.c_str();
+                path = prop->path + std::to_string(i) + prop->filetype;
+                c = path.c_str();
                 remove(c);
             }
         }

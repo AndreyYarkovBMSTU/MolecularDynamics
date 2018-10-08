@@ -17,7 +17,16 @@
  */
 class MolecularDinamic
 {
-
+private:
+    int k;
+    Vector f;
+    Vector f_;
+    Vector f_therm;
+    Vector f_LenJon;
+    Vector f_dipole;
+    std::string path;
+    std::ofstream out;
+    const char * c;
 public:
     ParticleSystem* system;
     Thermostat* thermostat;             ///< Термостат
@@ -32,7 +41,7 @@ public:
      */
     MolecularDinamic(ParticleSystem* _system, Methods* _method, Properties* _prop, std::string _nameThermostat, std::string _nameNumEq, std::string _namePotential) :
         system(_system), method(_method), prop(_prop)
-    {
+    {        
         interaction = new Interaction(_system, _method, _prop);
 
         if (_nameThermostat == "langevin")

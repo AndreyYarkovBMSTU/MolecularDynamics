@@ -24,6 +24,7 @@ struct ParticleSystem
 {
     int numParticles;                       ///< Число частиц
     Vector dipolemoment0;                    ///< Дипольный момент уединённой частицы
+    Vector extra_electricfield;
     std::vector<Particle*> particles;       ///< Контейнер частиц
     Environment* environment;               ///< Среда
     Properties* prop;

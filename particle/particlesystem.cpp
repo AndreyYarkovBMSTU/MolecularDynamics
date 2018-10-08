@@ -17,11 +17,11 @@ Particle* ParticleSystem::getParticle(int _nParticle)
 
 Vector ParticleSystem::getElectricField(int _nParticle)
 {
-    Vector extra_electricfield = Vector(0.0, 0.0, 0.0);
+    extra_electricfield = Vector(0.0, 0.0, 0.0);
 
     for (int b = 0; b < numParticles; b++)
     {
-        extra_electricfield += particles[b]->getElectricField(particles[_nParticle]->state->r);
+        extra_electricfield += particles[b]->getElectricField(particles[_nParticle]->getCoordinate());
     }
 
     return extra_electricfield;
@@ -39,7 +39,7 @@ Energy ParticleSystem::getInteractionEnergy(int _nParticle)
 
 Energy ParticleSystem::getInductionEnergy(int _nParticle)
 {
-    dipolemoment0 = environment->externalfield->electricfield * phys::getClausiusMossotti(prop->particlematerial->epsilon, environment->material->epsilon) * pow(2 * prop->radius, 3) / 8.0;
+    dipolemoment0 = environment->externalfield->electricfield * prop->ksi * pow(2 * prop->radius, 3) / 8.0;
 
     return - (environment->externalfield->electricfield.dot(particles[_nParticle]->dipolemoment) - environment->externalfield->electricfield.dot(dipolemoment0)) / 2.0;
 }

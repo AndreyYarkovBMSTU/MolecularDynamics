@@ -6,6 +6,8 @@
 
 class Methods
 {
+private:
+
 public:
     ParticleSystem* system;
     Properties* prop;
@@ -21,6 +23,8 @@ public:
 
 class NonIteractingDipoles : public Methods
 {
+private:
+    Vector dipolemoment;
 public:
     NonIteractingDipoles(ParticleSystem* _system, Properties* _prop) :
         Methods(_system, _prop)
@@ -33,6 +37,11 @@ public:
 
 class SelfConsistentDipoles : public Methods
 {
+private:
+    int a, b, k;
+    double kronec_ab;
+    double kronec_ij;
+    Vector n_ab;
 public:
     SelfConsistentDipoles(ParticleSystem* _system, Properties* _prop) :
         Methods(_system, _prop)
@@ -40,7 +49,7 @@ public:
 
     }
 
-    Matrix getBlock(int _a, int _b, Vector _ra, Vector _rb);
+    Matrix getBlock(Particle* particle1, Particle* particle2);
 
     Matrix getInteractionsMatrix();
 
