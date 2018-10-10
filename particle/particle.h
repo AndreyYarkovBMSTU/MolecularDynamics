@@ -28,9 +28,14 @@ struct Particle
 
     Vector getCoordinate();
     Vector getVelocity();
-
-    void setCoordinate(Vector _r);
-    void setVelocity(Vector _v);
+    void setCoordinate(Vector _r)
+    {
+        state->r = _r;
+    }
+    void setVelocity(Vector _v)
+    {
+        state->v = _v;
+    }
 
     virtual Vector getElectricField(Vector _r) = 0;
 };

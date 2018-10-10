@@ -25,9 +25,13 @@ private:
     Vector f_therm;
     Vector f_LenJon;
     Vector f_dipole;
+//<<<<<<< Updated upstream
     Matrix R_;
     vector<Vector> r_;            // Радиус-вектор частицы в настоящий момент времени
     vector<Vector> rp_;           // Радиус-вектор частицы в предыдущий момент времени
+//=======
+    Matrix _R;
+//>>>>>>> Stashed changes
     std::string path;
     std::ofstream out;
     const char * c;
@@ -46,6 +50,8 @@ public:
     MolecularDinamic(ParticleSystem* _system, Methods* _method, Properties* _prop, std::string _nameThermostat, std::string _nameNumEq, std::string _namePotential) :
         system(_system), method(_method), prop(_prop)
     {        
+
+        _R.resize(system->numParticles, 3);
         interaction = new Interaction(_system, _method, _prop);
 
         if (_nameThermostat == "langevin")
