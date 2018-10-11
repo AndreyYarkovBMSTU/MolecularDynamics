@@ -1,8 +1,8 @@
 #include "numeralequations.h"
 
-Vector Verle::getCoordinates(Vector _r, Vector _r_previous, Vector _force, double _mass)
+Vector Verle::getCoordinates(Vector _r, Vector _r_previous, Vector _a)
 {
-    return 2 * _r - _r_previous + _force * dt * dt / _mass;
+    return 2 * _r - _r_previous + _a * dt * dt;
 }
 
 /*!
@@ -12,7 +12,7 @@ Vector Verle::getCoordinates(Vector _r, Vector _r_previous, Vector _force, doubl
         v(t + dt) = \frac{r(t + dt)}{2 dt}
    \f]
  */
-Vector Verle::getVelocity(Vector _v, Vector _force_, Vector _force, double _mass)
+Vector Verle::getVelocity(Vector _v, Vector _a_, Vector _a)
 {
-    return _v + (_force_ + _force) * dt / (2 * _mass);
+    return _v + (_a + _a_) * dt / 2;
 }

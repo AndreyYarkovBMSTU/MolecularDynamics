@@ -22,8 +22,8 @@ public:
 
     }
 
-    virtual Vector getCoordinates(Vector _r, Vector _r_previous, Vector _force, double _mass) = 0;      ///< Получение радиус-вектора частицы
-    virtual Vector getVelocity(Vector _v, Vector _force_, Vector _force, double _mass) = 0;         ///< Получение вектора скорости частицы
+    virtual Vector getCoordinates(Vector _r, Vector _r_previous, Vector _a) = 0;      ///< Получение радиус-вектора частицы
+    virtual Vector getVelocity(Vector _v, Vector _a_, Vector _a) = 0;         ///< Получение вектора скорости частицы
 };
 
 /*!
@@ -49,7 +49,7 @@ public:
             r(t + dt) = 2 r(t) - r(t - dt) + \frac{F}{m} \cdot (dt)^{2}
        \f]
      */
-    Vector getCoordinates(Vector _r, Vector _r_previous, Vector _force, double _mass);
+    Vector getCoordinates(Vector _r, Vector _r_previous, Vector _a);
 
     /*!
      * Получение вектора скорости частицы
@@ -58,7 +58,7 @@ public:
             v(t + dt) = \frac{r(t + dt)}{2 dt}
        \f]
      */
-    Vector getVelocity(Vector _v, Vector _force_, Vector _force, double _mass);
+    Vector getVelocity(Vector _v, Vector _a_, Vector _a);
 };
 
 #endif // NUMERALEQUATIONS_H

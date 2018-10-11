@@ -9,8 +9,18 @@ void MolecularDinamic::dump()
     }
 }
 
+void MolecularDinamic::computeKoef()
+{
+    koef_demping = -18.0 / system->reinolds;
+    koef_LenJon = prop->koef_LenJon / (2 * prop->k * prop->temperature);
+    koef_randForce = pow(18 / system->reinolds, 0.5);
+    //koef_randForce = pow(2 * system->friction * prop->k * prop->temperature, 0.5) / system->particles[0]->mass;
+}
+
     void MolecularDinamic::computer(int _nParticle, int _nFrame)
     {
+        computeKoef();
+
         r_.resize(system->numParticles);
         rp_.resize(system->numParticles);
         R_.resize(system->numParticles, 3);
@@ -32,7 +42,6 @@ void MolecularDinamic::dump()
                 R_(nParticle, 2) = system->particles[nParticle]->getCoordinate()(2);
             }
 
-            f = Vector(0.0, 0.0, 0.0);
             // Расчёт координат частицы
             for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
             {
@@ -43,17 +52,19 @@ void MolecularDinamic::dump()
                     if (j != nParticle)
                     {
                         f_LenJon += - potential->getGradPotential(Vector(R_(nParticle, 0), R_(nParticle, 1), R_(nParticle, 2)),
-                                                                  Vector(R_(j, 0), R_(j, 1), R_(j, 2))) * prop->koef_LenJon;
+                                                                  Vector(R_(j, 0), R_(j, 1), R_(j, 2)));
     //                        if ((system->particles[nParticle]->state->r - system->particles[j]->state->r).norm() > 2 * system->particles[0]->radius)
     //                        {
     //                            f_dipole += interaction->getElectricForce(nParticle);
     //                        }
                     }
                 }
-                f = ((-18.0 * system->particles[nParticle]->getVelocity() / system->reinolds) - (1.0 / (2 * prop->k * prop->temperature)) * f_LenJon + pow(system->reinolds, 0.5) * thermostat->getForce()) * system->particles[nParticle]->mass;
+                a = (koef_demping * system->particles[nParticle]->getVelocity() + koef_LenJon * f_LenJon + koef_randForce * thermostat->getForce());
                 //Vector f = f_therm + f_LenJon + f_dipole;
                 r_[nParticle] = system->particles[nParticle]->getCoordinate();
-                system->particles[nParticle]->setCoordinate(numEq->getCoordinates(system->particles[nParticle]->getCoordinate(), rp_[nParticle], f, system->particles[nParticle]->mass));
+
+                system->particles[nParticle]->setCoordinate(numEq->getCoordinates(system->particles[nParticle]->getCoordinate(), rp_[nParticle], a));
+
             }
             for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
             {
@@ -72,33 +83,37 @@ void MolecularDinamic::dump()
                     if (j != nParticle)
                     {
                         f_LenJon += - potential->getGradPotential(Vector(R_(nParticle, 0), R_(nParticle, 1), R_(nParticle, 2)),
-                                                                  Vector(R_(j, 0), R_(j, 1), R_(j, 2))) * prop->koef_LenJon;
+                                                                  Vector(R_(j, 0), R_(j, 1), R_(j, 2)));
                         //                        if ((system->particles[nParticle]->state->r - system->particles[j]->state->r).norm() > 2 * system->particles[0]->radius)
                         //                        {
                         //                            f_dipole_for_numeq += interaction->getElectricForce(nParticle);
                         //                        }
                     }
                 }
-                f_ = ((-18.0 * system->particles[nParticle]->getVelocity() / system->reinolds) - (1.0 / (2 * prop->k * prop->temperature)) * f_LenJon + pow(system->reinolds, 0.5) * thermostat->getForce()) * system->particles[0]->mass;
-                system->particles[nParticle]->setVelocity(numEq->getVelocity(system->particles[nParticle]->getVelocity(), f_, f, system->particles[nParticle]->mass));
+                a_ = (koef_demping * system->particles[nParticle]->getVelocity() + koef_LenJon * f_LenJon + koef_randForce * thermostat->getForce());
+
+                system->particles[nParticle]->setVelocity(numEq->getVelocity(system->particles[nParticle]->getVelocity(), a_, a));
+
                 rp_[nParticle] = r_[nParticle];
 
-                rad+=(system->particles[nParticle]->getCoordinate() - r_[nParticle]).dot(system->particles[nParticle]->getCoordinate() - r_[nParticle]) * system->particles[0]->radius;
+                rad+=(system->particles[nParticle]->getCoordinate() - r_[nParticle]).norm();
                 //std::cout << f << std::endl;
                 //std::cout << nParticle << ": " << f_electrictest << std::endl;
                 //std::cout << nParticle << ": " << f_electric << std::endl;
             }
-                rad /= system->numParticles;
+            rad /= system->numParticles;
         }
 //        std::cout << system->particles[_nParticle]->state << std::endl;
         //std::cout << prop->mass << std::endl;
         //std::cout << thermostat->frictionkoef << std::endl;
-        std::cout << sqrt(4 * system->diffusion * t0) << std::endl;
-        std::cout << sqrt(rad / _nFrame) << std::endl;
+        //std::cout << 4 * system->diffusion * prop->timestep / pow(2 * system->particles[0]->radius, 2) << std::endl;
+        //std::cout << rad / _nFrame << std::endl;
     }
 
 void MolecularDinamic::record()
 {
+    computeKoef();
+
     r_.resize(system->numParticles);            // Радиус-вектор частицы в настоящий момент времени
     rp_.resize(system->numParticles);           // Радиус-вектор частицы в предыдущий момент времени
     R_.resize(system->numParticles, 3);
@@ -134,7 +149,6 @@ void MolecularDinamic::record()
             R_(nParticle, 2) = system->particles[nParticle]->getCoordinate()(2);
         }
 
-        f = Vector(0.0, 0.0, 0.0);
         // Расчёт координат частицы
         for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
         {
@@ -145,21 +159,23 @@ void MolecularDinamic::record()
                 if (j != nParticle)
                 {
                     f_LenJon += - potential->getGradPotential(Vector(R_(nParticle, 0), R_(nParticle, 1), R_(nParticle, 2)),
-                                                              Vector(R_(j, 0), R_(j, 1), R_(j, 2))) * prop->koef_LenJon;
+                                                              Vector(R_(j, 0), R_(j, 1), R_(j, 2)));
 //                        if ((system->particles[nParticle]->state->r - system->particles[j]->state->r).norm() > 2)
 //                        {
 //                            f_dipole += interaction->getElectricForce(nParticle);
 //                        }
                 }
             }
-            f = ((-18.0 * system->particles[nParticle]->getVelocity() / system->reinolds) + (1.0 / (2 * prop->k * prop->temperature)) * f_LenJon + pow(system->reinolds, 0.5) * thermostat->getForce()) * system->particles[0]->mass;
-            //Vector f = f_therm + f_LenJon + f_dipole;
+            a = (koef_demping * system->particles[nParticle]->getVelocity() + koef_LenJon * f_LenJon + koef_randForce * thermostat->getForce());
+
             if (i == 160)
             {
                 std::cout << thermostat->getForce() << std::endl;
             }
             r_[nParticle] = system->particles[nParticle]->getCoordinate();
-            system->particles[nParticle]->setCoordinate(numEq->getCoordinates(system->particles[nParticle]->getCoordinate(), rp_[nParticle], f, system->particles[nParticle]->mass));
+
+            system->particles[nParticle]->setCoordinate(numEq->getCoordinates(system->particles[nParticle]->getCoordinate(), rp_[nParticle], a));
+
         }
         for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
         {
@@ -178,15 +194,17 @@ void MolecularDinamic::record()
                 if (j != nParticle)
                 {
                     f_LenJon += - potential->getGradPotential(Vector(R_(nParticle, 0), R_(nParticle, 1), R_(nParticle, 2)),
-                                                              Vector(R_(j, 0), R_(j, 1), R_(j, 2))) * prop->koef_LenJon;
+                                                              Vector(R_(j, 0), R_(j, 1), R_(j, 2)));
 //                                            if ((system->particles[nParticle]->state->r - system->particles[j]->state->r).norm() > 2)
 //                                            {
 //                                                f_dipole += interaction->getElectricForce(nParticle);
 //                                            }
                 }
             }
-            f_ = ((-18.0 * system->particles[nParticle]->getVelocity() / system->reinolds) - (1.0 / (2 * prop->k * prop->temperature)) * f_LenJon + pow(system->reinolds, 0.5) * thermostat->getForce()) * system->particles[0]->mass;
-            system->particles[nParticle]->setVelocity(numEq->getVelocity(system->particles[nParticle]->getVelocity(), f_, f, system->particles[nParticle]->mass));
+            a_ = (koef_demping * system->particles[nParticle]->getVelocity() + koef_LenJon * f_LenJon + koef_randForce * thermostat->getForce());
+
+            system->particles[nParticle]->setVelocity(numEq->getVelocity(system->particles[nParticle]->getVelocity(), a_, a));
+
             rp_[nParticle] = r_[nParticle];
 
             if (bool(i % k == 0))
@@ -202,4 +220,69 @@ void MolecularDinamic::record()
         }
             out.close();
     }
+}
+
+void MolecularDinamic::recordmove(int _numfile, int _nFrame)
+{
+    computeKoef();
+
+    path = prop->path + std::to_string(_numfile) + prop->filetype;
+    out.open(path, std::ios::out | std::ios::binary);
+    outputline = std::to_string(0) + "  " + std::to_string(0) + "\n";
+
+    r_.resize(system->numParticles);
+    rp_.resize(system->numParticles);
+    R_.resize(system->numParticles, 3);
+
+    for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+    {
+        rp_[nParticle] = system->particles[nParticle]->getCoordinate();
+    }
+
+    rad = 0.0;
+    srand(time(NULL));
+    for (int frame = 0; frame < _nFrame; frame++)
+    {
+        for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+        {
+            R_(nParticle, 0) = system->particles[nParticle]->getCoordinate()(0);
+            R_(nParticle, 1) = system->particles[nParticle]->getCoordinate()(1);
+            R_(nParticle, 2) = system->particles[nParticle]->getCoordinate()(2);
+        }
+
+        // Расчёт координат частицы
+        for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+        {
+            a = (koef_demping * system->particles[nParticle]->getVelocity() + koef_randForce * thermostat->getForce());
+            r_[nParticle] = system->particles[nParticle]->getCoordinate();
+
+            system->particles[nParticle]->setCoordinate(numEq->getCoordinates(system->particles[nParticle]->getCoordinate(), rp_[nParticle], a));
+        }
+        for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+        {
+            R_(nParticle, 0) = system->particles[nParticle]->getCoordinate()(0);
+            R_(nParticle, 1) = system->particles[nParticle]->getCoordinate()(1);
+            R_(nParticle, 2) = system->particles[nParticle]->getCoordinate()(2);
+        }
+
+        // Расчёт скорости частицы
+        for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+        {
+            a_ = (koef_demping * system->particles[nParticle]->getVelocity() + koef_randForce * thermostat->getForce());
+
+            system->particles[nParticle]->setVelocity(numEq->getVelocity(system->particles[nParticle]->getVelocity(), a_, a));
+
+            rp_[nParticle] = r_[nParticle];
+
+            rad+=(system->particles[nParticle]->getCoordinate() - r_[nParticle]).norm();
+        }
+        rad /= system->numParticles;
+
+        if (frame % 100 == 0)
+        {
+            outputline += std::to_string(prop->timestep * frame) + "  " + std::to_string(rad) + "\n";
+        }
+    }
+    out << outputline;
+    out.close();
 }

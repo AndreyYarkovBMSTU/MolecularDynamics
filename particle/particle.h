@@ -28,12 +28,11 @@ struct Particle
     {
         name = "particle";
         radius = _obj->radius;
-        mass = material->density * 4/3 * M_PI * pow(radius, 3) * phys::kg();
+        mass = material->density * 4.0/3 * M_PI * pow(radius, 3) * phys::kg();
     }
 
     Vector getCoordinate();
     Vector getVelocity();
-
     void setCoordinate(Vector _r);
     void setVelocity(Vector _v);
 

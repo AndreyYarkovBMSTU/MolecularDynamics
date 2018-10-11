@@ -21,16 +21,23 @@ private:
     int k;
     double rad;
     double tau;                         ///< Коэффициент обезразмеривания по времени
+    double koef_demping;
+    double koef_LenJon;
+    double koef_randForce;
 
     Vector f;
     Vector f_;
+    Vector a;
+    Vector a_;
     Vector f_LenJon;
     Vector f_dipole;
     Matrix R_;
     vector<Vector> r_;            // Радиус-вектор частицы в настоящий момент времени
     vector<Vector> rp_;           // Радиус-вектор частицы в предыдущий момент времени
+    Matrix _R;
     std::string path;
     std::ofstream out;
+    std::string outputline;
     const char * c;
 public:
     double t0;                          ///< Обезразмеренное время
@@ -51,7 +58,10 @@ public:
         tau = 2 * system->particles[0]->radius / system->v_thermal;
         t0 = prop->timestep / tau;
 
-        interaction = new Interaction(system, method, prop);
+        interaction = new Interaction(system, method, prop);   
+
+        _R.resize(system->numParticles, 3);
+        interaction = new Interaction(_system, _method, _prop);
 
         if (_nameThermostat == "langevin")
         {
@@ -59,7 +69,7 @@ public:
         }
         if (_nameNumEq == "verle")
         {
-            numEq = new Verle(prop->timestep);
+            numEq = new Verle(t0);
         }
         if (_namePotential == "LJ")
         {
@@ -72,6 +82,7 @@ public:
      */
     void dump();
 
+    void computeKoef();
     /*!
      * Расситывает и выводит на экран состояние определённой частицы на определённом кадре
      */
@@ -81,6 +92,8 @@ public:
      * Расcчитывает и записывает в файл конфигурацию системы в последующие моменты времени
      */
     void record();
+
+    void recordmove(int _numfile, int _nFrame);
 };
 
 #endif // MOLECULARDINAMIC_H

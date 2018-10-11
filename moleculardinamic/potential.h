@@ -24,6 +24,8 @@ public:
 
     virtual double getPotential(Vector _r_1, Vector _r_2) = 0;              ///< Получение потенциала
     virtual Vector getGradPotential(Vector _r_1, Vector _r_2) = 0;          ///< Получение градинта потенциала
+    virtual double getPotential_dipole(Vector _r_1, Vector _r_2, Vector _dipolemoment_1, Vector _dipolemoment_2) = 0;
+    virtual Vector getGradPotential_dipole(Vector _r_1, Vector _r_2, Vector _dipolemoment_1, Vector _dipolemoment_2) = 0;
 };
 
 /*!
@@ -65,6 +67,9 @@ public:
        \f]
      */
     Vector getGradPotential(Vector _r_1, Vector _r_2);
+
+    double getPotential_dipole(Vector _r_1, Vector _r_2, Vector _dipolemoment_1, Vector _dipolemoment_2);
+    Vector getGradPotential_dipole(Vector _r_1, Vector _r_2, Vector _dipolemoment_1, Vector _dipolemoment_2);
 };
 
 /*!
@@ -104,6 +109,30 @@ public:
        \f]
      */
     Vector getGradPotential(Vector _r_1, Vector _r_2);
+
+    double getPotential_dipole(Vector _r_1, Vector _r_2, Vector _dipolemoment_1, Vector _dipolemoment_2);
+    Vector getGradPotential_dipole(Vector _r_1, Vector _r_2, Vector _dipolemoment_1, Vector _dipolemoment_2);
+};
+
+class StockMayer : public Potential
+{
+public:
+
+    StockMayer(double _scale) :
+        Potential(_scale)
+    {
+
+    }
+    ~StockMayer()
+    {
+
+    }
+
+    double getPotential(Vector _r_1, Vector _r_2);
+    Vector getGradPotential(Vector _r_1, Vector _r_2);
+
+    double getPotential_dipole(Vector _r_1, Vector _r_2, Vector _dipolemoment_1, Vector _dipolemoment_2);
+    Vector getGradPotential_dipole(Vector _r_1, Vector _r_2, Vector _dipolemoment_1, Vector _dipolemoment_2);
 };
 
 #endif // POTENTIAL_H
