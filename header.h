@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <random>
 #include <ctime>
 #include "Eigen/Eigen"
 #include "namespase/phys.h"

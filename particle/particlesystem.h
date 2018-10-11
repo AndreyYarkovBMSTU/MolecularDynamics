@@ -23,6 +23,11 @@ struct Energy
 struct ParticleSystem
 {
     int numParticles;                       ///< Число частиц
+    double reinolds;
+    double v_thermal;                       ///< Тепловая скорость
+    double ksi;                              ///< Фактор Клаузиуса-Моссотти
+    double friction;                         ///< Коэффициент внутреннего трения
+    double diffusion;
     Vector dipolemoment0;                    ///< Дипольный момент уединённой частицы
     Vector extra_electricfield;
     std::vector<Particle*> particles;       ///< Контейнер частиц
@@ -35,14 +40,14 @@ struct ParticleSystem
         environment(_environment), prop(_prop)
     {
         numParticles = 0;
-        dipolemoment0 = environment->externalfield->electricfield * phys::getClausiusMossotti(prop->particlematerial->epsilon, environment->material->epsilon) * pow(2 * prop->radius, 3) / 8.0;
-        prop->computePrandtlEl(dipolemoment0);
     }
 
     /*!
      * Помещение частицы в контейнер
      */
     void setParticle(Particle* _particle);
+
+    void setProperties();
 
     /*!
      * Получение частицы

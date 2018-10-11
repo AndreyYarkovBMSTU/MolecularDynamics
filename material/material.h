@@ -14,6 +14,7 @@ struct Material {
     double mu;
     double density;             ///< Плотность
     double viscosity;           ///< Вязкость
+    double kinviscosity;        ///< Кинематическая вязкость
     std::string name;
     std::string formula;
     std::string electricType;
@@ -94,8 +95,9 @@ struct Water : Material
     {
         epsilon = 80.1;  // T = 20 C;
         mu = 1.0;
-        viscosity = 8.9e-4;  // [Pa * s]
+        viscosity = 1.002 * 1e-3;  // [Pa * s]
         density = 998; // [kg / m3]
+        kinviscosity = 1.004 * 1e-6;
     }
 };
 

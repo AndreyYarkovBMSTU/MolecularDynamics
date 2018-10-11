@@ -4,6 +4,7 @@
 #include "header.h"
 #include "state.h"
 #include "material/material.h"
+#include "object.h"
 
 /*!
  * \brief Класс частиц
@@ -12,6 +13,8 @@
  */
 struct Particle
 {
+    double radius;
+    double mass;                ///< Масса частицы
     Vector dipolemoment;        ///< Дипольный момент
     State* state;               ///< Состояние
     std::string name;           ///< Название
@@ -20,10 +23,12 @@ struct Particle
     /*!
      * Конструктор класса Particle
      */
-    Particle(State* _state, Material* _material) :
+    Particle(State* _state, Material* _material, Object* _obj) :
         state(_state), material(_material)
     {
         name = "particle";
+        radius = _obj->radius;
+        mass = material->density * 4/3 * M_PI * pow(radius, 3) * phys::kg();
     }
 
     Vector getCoordinate();
@@ -43,8 +48,8 @@ struct Dipoloid : Particle
     /*!
      * Конструктор класса Dipoloid
      */
-    Dipoloid(State* _state, Material* _material) :
-        Particle(_state, _material)
+    Dipoloid(State* _state, Material* _material, Object* _obj) :
+        Particle(_state, _material, _obj)
     {
         name = "dipoloid";
     }

@@ -55,6 +55,7 @@ namespace phys
 
     // Gauss distribution
     double getGaussian(double _t, double _tm, double _sigma);
+    double getDistribFunc(double _t, double _tm, double _sigma);
 }
 
 #endif // PHYS_H

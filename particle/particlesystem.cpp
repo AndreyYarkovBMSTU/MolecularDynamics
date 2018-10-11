@@ -6,6 +6,16 @@ void ParticleSystem::setParticle(Particle* _particle)
     numParticles++;
 }
 
+void ParticleSystem::setProperties()
+{
+    v_thermal = pow(2 * prop->k * prop->temperature / particles[0]->mass, 0.5);
+    reinolds = 2 * particles[0]->radius * v_thermal / environment->material->kinviscosity;
+    ksi = phys::getClausiusMossotti(particles[0]->material->epsilon, environment->material->epsilon);
+    friction = 6.0 * M_PI * particles[0]->radius * environment->material->viscosity;
+    diffusion = prop->k * prop->temperature / friction;
+    dipolemoment0 = environment->externalfield->electricfield * ksi * pow(2 * particles[0]->radius, 3) / 8.0;
+}
+
 /*!
  * Получение частицы
  * \return Частицу
@@ -29,7 +39,7 @@ Vector ParticleSystem::getElectricField(int _nParticle)
 
 Energy ParticleSystem::getSelfEnergy(int _nParticle)
 {
-    return (particles[_nParticle]->dipolemoment.dot(particles[_nParticle]->dipolemoment) - dipolemoment0.dot(dipolemoment0)) / (2 * pow(prop->radius, 3));
+    return (particles[_nParticle]->dipolemoment.dot(particles[_nParticle]->dipolemoment) - dipolemoment0.dot(dipolemoment0)) / (2 * pow(particles[0]->radius, 3));
 }
 
 Energy ParticleSystem::getInteractionEnergy(int _nParticle)
@@ -39,7 +49,7 @@ Energy ParticleSystem::getInteractionEnergy(int _nParticle)
 
 Energy ParticleSystem::getInductionEnergy(int _nParticle)
 {
-    dipolemoment0 = environment->externalfield->electricfield * prop->ksi * pow(2 * prop->radius, 3) / 8.0;
+    dipolemoment0 = environment->externalfield->electricfield * ksi * pow(2 * particles[0]->radius, 3) / 8.0;
 
     return - (environment->externalfield->electricfield.dot(particles[_nParticle]->dipolemoment) - environment->externalfield->electricfield.dot(dipolemoment0)) / 2.0;
 }

@@ -32,7 +32,7 @@ public:
     Interaction(ParticleSystem* _system, Methods* _method, Properties* _prop) :
         system(_system), method(_method), prop(_prop)
     {
-        dr = _prop->radius * 1e-1;
+        dr = 1e-1;
     }
 
     double getGradEnergy(int _nParticle, int _nCoord);

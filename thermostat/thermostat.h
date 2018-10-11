@@ -31,6 +31,7 @@ struct Thermostat
  */
 struct Langevin : Thermostat
 {
+    std::random_device rd;
     /*!
      * Конструктор класса Langevin
      */

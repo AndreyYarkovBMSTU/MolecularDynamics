@@ -20,9 +20,10 @@ class MolecularDinamic
 private:
     int k;
     double rad;
+    double tau;                         ///< Коэффициент обезразмеривания по времени
+
     Vector f;
     Vector f_;
-    Vector f_therm;
     Vector f_LenJon;
     Vector f_dipole;
     Matrix R_;
@@ -32,6 +33,7 @@ private:
     std::ofstream out;
     const char * c;
 public:
+    double t0;                          ///< Обезразмеренное время
     ParticleSystem* system;
     Thermostat* thermostat;             ///< Термостат
     NumeralEquations* numEq;            ///< Численная схема
@@ -45,20 +47,23 @@ public:
      */
     MolecularDinamic(ParticleSystem* _system, Methods* _method, Properties* _prop, std::string _nameThermostat, std::string _nameNumEq, std::string _namePotential) :
         system(_system), method(_method), prop(_prop)
-    {        
-        interaction = new Interaction(_system, _method, _prop);
+    {
+        tau = 2 * system->particles[0]->radius / system->v_thermal;
+        t0 = prop->timestep / tau;
+
+        interaction = new Interaction(system, method, prop);
 
         if (_nameThermostat == "langevin")
         {
-            thermostat = new Langevin(system->environment, _prop);
+            thermostat = new Langevin(system->environment, prop);
         }
         if (_nameNumEq == "verle")
         {
-            numEq = new Verle(_prop->timestep);
+            numEq = new Verle(prop->timestep);
         }
         if (_namePotential == "LJ")
         {
-            potential = new LJ(prop->radius);
+            potential = new LJ(1.0);
         }
     }
 

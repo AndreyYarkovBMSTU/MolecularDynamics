@@ -56,7 +56,8 @@ HEADERS += \
     particle/state.h \
     thermostat/thermostat.h \
     header.h \
-    properties.h
+    properties.h \
+    object.h
 
 FORMS += \
         mainwindow.ui

@@ -9,6 +9,7 @@
 #include "thermostat/thermostat.h"
 #include "moleculardinamic/moleculardinamic.h"
 #include "properties.h"
+#include "object.h"
 
 
 int main()
@@ -19,19 +20,19 @@ int main()
 
     Properties* prop = new Properties(particlematerial, solvent);
 
-    State* state1 = new State(1, Vector(-2.0, 1.0, 0.0) * phys::um() * 10.0, Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
-    State* state2 = new State(2, Vector(2.0, -1.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
-//    State* state1 = new State(1, Vector(-4.0, -2.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
-//    State* state2 = new State(2, Vector(1.0, -4.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
-//    State* state3 = new State(3, Vector(2.0, 4.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
-//    State* state4 = new State(2, Vector(-4.0, 3.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
-//    State* state5 = new State(3, Vector(-4.0, 1.0, 0.0) * phys::um(), Vector(0.0, 0.0, 0.0) * phys::um() / phys::s());
+    Object* obj = new Object(prop->radius);
 
-    Particle* particle1 = new Dipoloid(state1, particlematerial);
-    Particle* particle2 = new Dipoloid(state2, particlematerial);
-//    Particle* particle3 = new Dipoloid(state3, particlematerial);
-//    Particle* particle4 = new Dipoloid(state4, particlematerial);
-//    Particle* particle5 = new Dipoloid(state5, particlematerial);
+    State* state1 = new State(1, Vector(-1.1, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
+    State* state2 = new State(2, Vector(1.1, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
+    State* state3 = new State(3, Vector(2.0, 4.0, 0.0), Vector(0.0, 0.0, 0.0));
+    State* state4 = new State(2, Vector(-4.0, 3.0, 0.0), Vector(0.0, 0.0, 0.0));
+    State* state5 = new State(3, Vector(-4.0, 1.0, 0.0), Vector(0.0, 0.0, 0.0));
+
+    Particle* particle1 = new Dipoloid(state1, particlematerial, obj);
+    Particle* particle2 = new Dipoloid(state2, particlematerial, obj);
+    Particle* particle3 = new Dipoloid(state3, particlematerial, obj);
+    Particle* particle4 = new Dipoloid(state4, particlematerial, obj);
+    Particle* particle5 = new Dipoloid(state5, particlematerial, obj);
 
     //ExternalFields* externalfield = new DirectedField(prop, Vector(1e3, 0.0, 0.0));
     ExternalFields* externalfield = new RotatingField(prop, Vector(1e3, 0.0, 0.0), 30 * 1e3);
@@ -40,16 +41,16 @@ int main()
     ParticleSystem* system = new ParticleSystem(environment, prop);
     system->setParticle(particle1);
     system->setParticle(particle2);
-//    system->setParticle(particle3);
-//    system->setParticle(particle4);
-//    system->setParticle(particle5);
+    system->setParticle(particle3);
+    system->setParticle(particle4);
+    system->setParticle(particle5);
+    system->setProperties();
 
     // Расчёт
 
     Methods* method = new SelfConsistentDipoles(system, prop);
 
     method->setDipoleMoment();
-    std::cout << system->particles[0]->dipolemoment;
 
     MolecularDinamic* moleculardinamic = new MolecularDinamic(system,
                                                               method,
@@ -58,9 +59,12 @@ int main()
                                                               "verle",
                                                               "LJ");
 
-//    moleculardinamic->record();
+    moleculardinamic->record();
 
-    moleculardinamic->computer(2, 1000);
+    std::cout << "Reinolds: " << system->reinolds << std::endl;
+    std::cout << "t0: " << moleculardinamic->t0 << std::endl;
+
+//    moleculardinamic->computer(2, 100000);
 
 //    for (auto &iParticle : particlesystem->particles)
 //    {
@@ -68,19 +72,35 @@ int main()
 //    }
 
 
+//    std::vector<int> hist;
+//    hist.resize(1030);
 //    std::string path = "output/gauss.txt";
 //    std::ofstream out;
 //    out.open(path, std::ios::out | std::ios::binary);
-//    for (int i = 0; i < 1000; i++)
+//    for (int iter = 0; iter < 1000000; iter++)
 //    {
-//        double t = -300 + std::rand() % 600;
-//        double f = phys::getGaussian(t / 100, 0.0 , 1.0);
-//        std::string o = std::to_string(t / 100) + "   " + std::to_string(f) + "\n";
-
-//        out << o;
+//        std::random_device rd;
+//        std::mt19937 gen(rd());
+//        std::normal_distribution<> d(0, 1);
+//        double f = d(gen);
+//        for (int i = 0; i < hist.size(); i++)
+//        {
+//            if (f >= -3 + i * 6.0 / hist.size() && f <= -3 + (1 + i) * 6.0 / hist.size())
+//            {
+//                hist[i] += 1;
+//            }
+//        }
 //    }
-//    out.close();
+//    double delta = 3.0 / hist.size();
+//    std::string o = std::to_string(-3 + delta) + "   " + std::to_string(hist[0]) + "\n";
+//    for (int i = 1; i < hist.size(); i++)
+//    {
+//        delta = (2 * i + 1) * 3.0 / hist.size();
+//        o += std::to_string(-3 + delta) + "   " + std::to_string(hist[i]) + "\n";
+//    }
 
+//    out << o;
+//    out.close();
 
     return 0;
 }

@@ -24,7 +24,7 @@ void Interaction::recordPotentials(int _numPoints, std::string _energytype)
     r_ = system->particles[1]->getCoordinate();
     path0 = prop->path + "Self" + prop->filetype;
     out0.open(path0, std::ios::out | std::ios::binary);
-    out0 << system->dipolemoment0.dot(system->dipolemoment0) / (4 * pow(2 * prop->radius, 3));
+    out0 << system->dipolemoment0.dot(system->dipolemoment0) / (4 * pow(2 * system->particles[0]->radius, 3));
     out0.close();
     for (int i = 0; i < _numPoints; i++)
     {
@@ -40,17 +40,17 @@ void Interaction::recordPotentials(int _numPoints, std::string _energytype)
 
         path = prop->path + _energytype + "Average" + std::to_string(i) + prop->filetype;
         out.open(path, std::ios::out | std::ios::binary);
-        out << system->particles[1]->getCoordinate()(0) / (2 * prop->radius) << " " << getAverageEnergy(0, _energytype);
+        out << system->particles[1]->getCoordinate()(0) / (2 * system->particles[0]->radius) << " " << getAverageEnergy(0, _energytype);
         out.close();
 
-        if (system->particles[1]->getCoordinate()(0) / (2 * prop->radius) >= 10.0)
+        if (system->particles[1]->getCoordinate()(0) / (2 * system->particles[0]->radius) >= 10.0)
         {
             system->particles[1]->setCoordinate(Vector(1e10, r_(1), r_(2)));
             std::cout << _energytype << " " << getAverageEnergy(1, _energytype) << std::endl;
             system->particles[1]->setCoordinate(r_);
             break;
         }
-        //system->particles[1]->state->r(0) += 10.0 *  2 * prop->radius / _numPoints;
+        //system->particles[1]->state->r(0) += 10.0 *  2 * system->particles[0]->radius / _numPoints;
     }
 }
 
