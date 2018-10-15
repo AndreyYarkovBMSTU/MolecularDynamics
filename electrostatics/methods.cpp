@@ -75,7 +75,8 @@ void SelfConsistentDipoles::setDipoleMoment()
     {
         for(int j = 0; j < 3; j++)
         {
-            system->particles[i]->dipolemoment(j) = Dipolemoment(k);
+//            system->particles[i]->dipolemoment(j) = Dipolemoment(k);
+            system->particles[i]->dipolemoment(j) = Dipolemoment(k) / system->dipolemoment0.norm();
             k++;
         }
     }

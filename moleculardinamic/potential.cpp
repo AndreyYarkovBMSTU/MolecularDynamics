@@ -29,8 +29,8 @@ double LJ::getPotential(Vector _r_1, Vector _r_2)
 
 Vector LJ::getGradPotential(Vector _r_1, Vector _r_2)
 {
-        return 4 * (- 12 * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 12) * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 2) * (_r_1 - _r_2) * scale
-                    + 6 * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 6) * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 2) * (_r_1 - _r_2) * scale);
+        return 4 * (- 12 * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 12) * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 2) * (_r_1 - _r_2) * scale);
+                   // + 6 * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 6) * pow(2.0 / ((_r_1 - _r_2).norm() * scale), 2) * (_r_1 - _r_2) * scale);
 }
 
 double LJ::getPotential_dipole(Vector _r_1, Vector _r_2, Vector _dipolemoment_1, Vector _dipolemoment_2)

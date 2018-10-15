@@ -24,7 +24,9 @@ private:
     double koef_demping;
     double koef_LenJon;
     double koef_randForce;
+    double koef_dipole;
 
+    Vector v;
     Vector f;
     Vector f_;
     Vector a;
@@ -48,6 +50,7 @@ public:
     Methods* method;                    ///< Метод расчёта взаимодействия
     Interaction* interaction;
     Properties* prop;                   ///< Свойства
+    std::string nameThermostat;
 
     /*!
      * Конструктор класса MolecularDinamic
@@ -65,8 +68,15 @@ public:
 
         if (_nameThermostat == "langevin")
         {
+            nameThermostat = _nameThermostat;
             thermostat = new Langevin(system->environment, prop);
         }
+        else if (_nameThermostat == "brownian")
+        {
+            nameThermostat = _nameThermostat;
+            thermostat = new Brownian(system->environment, prop);
+        }
+
         if (_nameNumEq == "verle")
         {
             numEq = new Verle(t0);
@@ -94,6 +104,11 @@ public:
     void record();
 
     void recordmove(int _numfile, int _nFrame);
+
+    void setVelocityLangevin();
+    void setCoordinateLangevin();
+    void setVelocityBrownian();
+    void setCoordinateBrownian();
 };
 
 #endif // MOLECULARDINAMIC_H

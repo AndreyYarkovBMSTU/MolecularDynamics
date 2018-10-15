@@ -39,6 +39,8 @@ public:
 
     Vector getElectricForce(int _nParticle);
 
+    Vector getElectricForceDipole(int _nParticle);
+
     void recordPotentials(int _numPoints, std::string _energytype);
 
     void recordEnergy(int _nParticle, std::string _energytype);

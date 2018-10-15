@@ -19,6 +19,21 @@ Vector Interaction::getElectricForce(int _nParticle)
     return Vector(- getGradEnergy(_nParticle, 0), - getGradEnergy(_nParticle, 1), 0.0);
 }
 
+Vector Interaction::getElectricForceDipole(int _nParticle)
+{
+    method->setDipoleMoment();
+    force = Vector(0.0, 0.0, 0.0);
+    for (int i = 0; i < system->numParticles; i++)
+    {
+        if (i != _nParticle)
+        {
+            force += Vector(0.0, 0.0, 0.0);
+        }
+    }
+
+    return force;
+}
+
 void Interaction::recordPotentials(int _numPoints, std::string _energytype)
 {
     r_ = system->particles[1]->getCoordinate();

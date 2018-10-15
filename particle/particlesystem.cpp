@@ -39,7 +39,8 @@ Vector ParticleSystem::getElectricField(int _nParticle)
 
 Energy ParticleSystem::getSelfEnergy(int _nParticle)
 {
-    return (particles[_nParticle]->dipolemoment.dot(particles[_nParticle]->dipolemoment) - dipolemoment0.dot(dipolemoment0)) / (2 * pow(particles[0]->radius, 3));
+//    return (particles[_nParticle]->dipolemoment.dot(particles[_nParticle]->dipolemoment) - dipolemoment0.dot(dipolemoment0)) / (2 * pow(particles[0]->radius, 3));
+    return (particles[_nParticle]->dipolemoment.dot(particles[_nParticle]->dipolemoment) - 1.0) / 8.0;
 }
 
 Energy ParticleSystem::getInteractionEnergy(int _nParticle)

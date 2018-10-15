@@ -48,4 +48,23 @@ struct Langevin : Thermostat
     Vector getForce();
 };
 
+struct Brownian : Thermostat
+{
+    std::random_device rd;
+    /*!
+     * Конструктор класса Brownian
+     */
+    Brownian(Environment* _medium, Properties* _prop) :
+        Thermostat(_medium, _prop)
+    {
+
+    }
+
+    /*!
+     * Рассчитывет силу, действующую на частицу, обусловленную броуновским движением и сопротивлением среды
+     * \return Результирующую силу как сумму случайной броуновской силы и силы сопротивления среды
+     */
+    Vector getForce();
+};
+
 #endif // THERMOSTAT_H
