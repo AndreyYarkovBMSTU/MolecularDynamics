@@ -5,18 +5,38 @@ double Interaction::getGradEnergy(int _nParticle, int _nCoord)
     system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord) + dr;
     U_ = system->getInteractionEnergy(_nParticle).energy + system->getSelfEnergy(_nParticle).energy;
     system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord) - dr;
-    U_ = U_ - system->getInteractionEnergy(_nParticle).energy + system->getSelfEnergy(_nParticle).energy;
+    U_ = U_ - (system->getInteractionEnergy(_nParticle).energy + system->getSelfEnergy(_nParticle).energy);
     system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord);
 
-    return (U_ - U) / (2 * dr);
+    return U_ / (2 * dr);
+}
+
+double Interaction::getGradAverageEnergy(int _nParticle, int _nCoord)
+{
+    system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord) + dr;
+    U_ = (getAverageEnergy(_nParticle, "interaction") + getAverageEnergy(_nParticle, "self")) * prop->numAngles;
+    system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord) - dr;
+    U_ = U_ - (getAverageEnergy(_nParticle, "interaction") + getAverageEnergy(_nParticle, "self")) * prop->numAngles;
+    system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord);
+
+    return U_ / (2 * dr);
 }
 
 Vector Interaction::getElectricForce(int _nParticle)
 {
-    method->setDipoleMoment();
-    r_ = system->particles[_nParticle]->getCoordinate();
+    if (accuracyEnergy == "average")
+    {
+        r_ = system->particles[_nParticle]->getCoordinate();
 
-    return Vector(- getGradEnergy(_nParticle, 0), - getGradEnergy(_nParticle, 1), 0.0);
+        return Vector(- getGradAverageEnergy(_nParticle, 0), - getGradAverageEnergy(_nParticle, 1), 0.0);
+    }
+    if (accuracyEnergy == "exact")
+    {
+        method->setDipoleMoment();
+        r_ = system->particles[_nParticle]->getCoordinate();
+
+        return Vector(- getGradEnergy(_nParticle, 0), - getGradEnergy(_nParticle, 1), 0.0);
+    }
 }
 
 Vector Interaction::getElectricForceDipole(int _nParticle)
@@ -37,7 +57,7 @@ Vector Interaction::getElectricForceDipole(int _nParticle)
 void Interaction::recordPotentials(int _numPoints, std::string _energytype)
 {
     r_ = system->particles[1]->getCoordinate();
-    path0 = prop->path + "Self" + prop->filetype;
+    path0 = prop->path + "deltaenergy/" + "Self" + prop->filetype;
     out0.open(path0, std::ios::out | std::ios::binary);
     out0 << system->dipolemoment0.dot(system->dipolemoment0) / (4 * pow(2 * system->particles[0]->radius, 3));
     out0.close();
@@ -53,7 +73,7 @@ void Interaction::recordPotentials(int _numPoints, std::string _energytype)
             system->particles[1]->setCoordinate(Vector(pow(10, log10(2.1 + (i - 10) * 0.1)),  r_(1), r_(2))); // 2.5304
         }
 
-        path = prop->path + _energytype + "Average" + std::to_string(i) + prop->filetype;
+        path = prop->path + "deltaenergy/" + _energytype + "Average" + std::to_string(i) + prop->filetype;
         out.open(path, std::ios::out | std::ios::binary);
         out << system->particles[1]->getCoordinate()(0) / (2 * system->particles[0]->radius) << " " << getAverageEnergy(0, _energytype);
         out.close();
@@ -78,12 +98,10 @@ void Interaction::recordEnergy(int _nParticle, std::string _energytype)
         for (int i = 0; i <= prop->numAngles; i++)
         {
             phi = i * M_PI / 2 / prop->numAngles;
-            Ex_ = electricfield_.norm() * cos(phi);
-            Ey_ = electricfield_.norm() * sin(phi);
-            system->environment->externalfield->electricfield = Vector(Ex_, Ey_, 0.0);
+            system->environment->externalfield->electricfield = Vector(electricfield_.norm() * cos(phi), electricfield_.norm() * sin(phi), 0.0);
             method->setDipoleMoment();
 
-            path = prop->path + _energytype + std::to_string(i) + prop->filetype;
+            path = prop->path + "energy/" + _energytype + std::to_string(i) + prop->filetype;
             out.open(path, std::ios::out | std::ios::binary);
             if (_energytype == "induction")
             {
@@ -111,9 +129,8 @@ double Interaction::getAverageEnergy(int _nParticle, std::string _energytype)
         for (int i = 0; i < prop->numAngles; i++)
         {
             phi = i * 2 * M_PI / prop->numAngles;
-            Ex_ = electricfield_.norm() * cos(phi);
-            Ey_ = electricfield_.norm() * sin(phi);
-            system->environment->externalfield->electricfield = Vector(Ex_, Ey_, 0.0);
+            system->environment->externalfield->electricfield = Vector(electricfield_.norm() * cos(phi), electricfield_.norm() * sin(phi), 0.0);
+
             method->setDipoleMoment();
             if (_energytype == "induction")
             {

@@ -22,11 +22,11 @@ int main()
 
     Object* obj = new Object(prop->radius);
 
-    State* state1 = new State(1, Vector(-1.1, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
-    State* state2 = new State(2, Vector(1.1, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
-    State* state3 = new State(3, Vector(2.0, 4.0, 0.0), Vector(0.0, 0.0, 0.0));
-    State* state4 = new State(4, Vector(-4.0, 3.0, 0.0), Vector(0.0, 0.0, 0.0));
-    State* state5 = new State(5, Vector(-6.0, 1.0, 0.0), Vector(0.0, 0.0, 0.0));
+    State* state1 = new State(1, Vector(-2.0, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
+    State* state2 = new State(2, Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
+    State* state3 = new State(3, Vector(2.0, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
+//    State* state4 = new State(4, Vector(-4.0, 3.0, 0.0), Vector(0.0, 0.0, 0.0));
+//    State* state5 = new State(5, Vector(-6.0, 1.0, 0.0), Vector(0.0, 0.0, 0.0));
 //    State* state6 = new State(6, Vector(-1.1, 4.0, 0.0), Vector(0.0, 0.0, 0.0));
 //    State* state7 = new State(7, Vector(1.1, 2.0, 0.0), Vector(0.0, 0.0, 0.0));
 //    State* state8 = new State(8, Vector(4.0, 4.0, 0.0), Vector(0.0, 0.0, 0.0));
@@ -36,15 +36,15 @@ int main()
     Particle* particle1 = new Dipoloid(state1, particlematerial, obj);
     Particle* particle2 = new Dipoloid(state2, particlematerial, obj);
     Particle* particle3 = new Dipoloid(state3, particlematerial, obj);
-    Particle* particle4 = new Dipoloid(state4, particlematerial, obj);
-    Particle* particle5 = new Dipoloid(state5, particlematerial, obj);
+//    Particle* particle4 = new Dipoloid(state4, particlematerial, obj);
+//    Particle* particle5 = new Dipoloid(state5, particlematerial, obj);
 //    Particle* particle6 = new Dipoloid(state6, particlematerial, obj);
 //    Particle* particle7 = new Dipoloid(state7, particlematerial, obj);
 //    Particle* particle8 = new Dipoloid(state8, particlematerial, obj);
 //    Particle* particle9 = new Dipoloid(state9, particlematerial, obj);
 //    Particle* particle10 = new Dipoloid(state10, particlematerial, obj);
 
-    //ExternalFields* externalfield = new DirectedField(prop, Vector(1e3, 0.0, 0.0));
+    //ExternalFields* externalfield = new DirectedField(prop, Vector(1.0, 0.0, 0.0));
     ExternalFields* externalfield = new RotatingField(prop, Vector(1.0, 0.0, 0.0), 30 * 1e3);
     Environment* environment = new Environment(solvent, externalfield);
 
@@ -52,8 +52,8 @@ int main()
     system->setParticle(particle1);
     system->setParticle(particle2);
     system->setParticle(particle3);
-    system->setParticle(particle4);
-    system->setParticle(particle5);
+//    system->setParticle(particle4);
+//    system->setParticle(particle5);
 //    system->setParticle(particle6);
 //    system->setParticle(particle7);
 //    system->setParticle(particle8);
@@ -67,14 +67,55 @@ int main()
 
     method->setDipoleMoment();
 
+    std::cout << "T / timestep: " << (2 * M_PI / system->environment->externalfield->omega) / prop->timestep << std::endl;
+
     MolecularDinamic* moleculardinamic = new MolecularDinamic(system,
                                                               method,
                                                               prop,
-                                                              "brownian",//"langevin",
+                                                              "brownian",//"langevin"
                                                               "verle",
-                                                              "LJ");
+                                                              "LJ",
+                                                              "exact"); //"average"
 
-    moleculardinamic->record();
+    moleculardinamic->record(prop->path + "time13/");
+
+    std::cout << "First modeling finished" << std::endl;
+
+    externalfield->omega = externalfield->omega / (moleculardinamic->t0 * prop->koef_omega);
+
+    system->particles[0]->setCoordinate(Vector(-1.5, 0.0, 0.0));
+    system->particles[0]->setVelocity(Vector(0.0, 0.0, 0.0));
+    system->particles[1]->setCoordinate(Vector(1.5, 0.0, 0.0));
+    system->particles[1]->setVelocity(Vector(0.0, 0.0, 0.0));
+    system->particles[2]->setCoordinate(Vector(2.0, 4.0, 0.0));
+    system->particles[2]->setVelocity(Vector(0.0, 0.0, 0.0));
+
+
+    method->setDipoleMoment();
+
+//    MolecularDinamic* moleculardinamic1 = new MolecularDinamic(system,
+//                                                              method,
+//                                                              prop,
+//                                                              "brownian",//"langevin"
+//                                                              "verle",
+//                                                              "LJ",
+//                                                              "average"); //"exact"
+//    moleculardinamic1->record(prop->path + "time1/");
+
+//    std::cout << "Second modeling finished" << std::endl;
+
+//    prop->koef_dipole = 1e1;
+//    moleculardinamic->record(prop->path + "time2/");
+
+//    system->particles[0]->setCoordinate(Vector(-1.5, 0.0, 0.0));
+//    system->particles[0]->setVelocity(Vector(0.0, 0.0, 0.0));
+//    system->particles[1]->setCoordinate(Vector(1.5, 0.0, 0.0));
+//    system->particles[1]->setVelocity(Vector(0.0, 0.0, 0.0));
+//    system->particles[2]->setCoordinate(Vector(2.0, 4.0, 0.0));
+//    system->particles[2]->setVelocity(Vector(0.0, 0.0, 0.0));
+
+//    prop->koef_dipole = 1e2;
+//    moleculardinamic->record(prop->path + "time3/");
 
     std::cout << "Reinolds: " << system->reinolds << std::endl;
     std::cout << "v_thermal: " << system->v_thermal << std::endl;
@@ -87,7 +128,7 @@ int main()
 
 //    for (int numfile = 0; numfile < 100; numfile++)
 //    {
-//        moleculardinamic->recordmove(numfile, 10000);
+//        moleculardinamic->recordmove(numfile, 100000);
 //        system->particles[0]->setCoordinate(Vector(-1.1, 0.0, 0.0));
 //        system->particles[0]->setVelocity(Vector(0.0, 0.0, 0.0));
 //    }

@@ -28,14 +28,16 @@ public:
     ParticleSystem* system;
     Methods* method;
     Properties* prop;
+    std::string accuracyEnergy;
 
-    Interaction(ParticleSystem* _system, Methods* _method, Properties* _prop) :
-        system(_system), method(_method), prop(_prop)
+    Interaction(ParticleSystem* _system, Methods* _method, Properties* _prop, std::string _accuracyEnergy) :
+        system(_system), method(_method), prop(_prop), accuracyEnergy(_accuracyEnergy)
     {
         dr = 1e-1;
     }
 
     double getGradEnergy(int _nParticle, int _nCoord);
+    double getGradAverageEnergy(int _nParticle, int _nCoord);
 
     Vector getElectricForce(int _nParticle);
 

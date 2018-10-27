@@ -19,6 +19,7 @@ class MolecularDinamic
 {
 private:
     int k;
+    int numParticles;
     double rad;
     double tau;                         ///< Коэффициент обезразмеривания по времени
     double koef_demping;
@@ -42,6 +43,7 @@ private:
     std::string outputline;
     const char * c;
 public:
+    int numFrames;
     double t0;                          ///< Обезразмеренное время
     ParticleSystem* system;
     Thermostat* thermostat;             ///< Термостат
@@ -51,20 +53,30 @@ public:
     Interaction* interaction;
     Properties* prop;                   ///< Свойства
     std::string nameThermostat;
+    std::string accuracyEnergy;
 
     /*!
      * Конструктор класса MolecularDinamic
      */
-    MolecularDinamic(ParticleSystem* _system, Methods* _method, Properties* _prop, std::string _nameThermostat, std::string _nameNumEq, std::string _namePotential) :
-        system(_system), method(_method), prop(_prop)
+    MolecularDinamic(ParticleSystem* _system, Methods* _method, Properties* _prop, std::string _nameThermostat, std::string _nameNumEq, std::string _namePotential, std::string _accuracyEnergy) :
+        system(_system), method(_method), prop(_prop), accuracyEnergy(_accuracyEnergy)
     {
+        if (_accuracyEnergy == "average")
+        {
+            numFrames = prop->numFrames / prop->numAngles;
+        }
+        else
+        {
+           numFrames = prop->numFrames;
+        }
+
         tau = 2 * system->particles[0]->radius / system->v_thermal;
         t0 = prop->timestep / tau;
+        system->environment->externalfield->omega = system->environment->externalfield->omega * t0 * prop->koef_omega;
 
-        interaction = new Interaction(system, method, prop);   
+        interaction = new Interaction(system, method, prop, _accuracyEnergy);
 
         _R.resize(system->numParticles, 3);
-        interaction = new Interaction(_system, _method, _prop);
 
         if (_nameThermostat == "langevin")
         {
@@ -101,7 +113,7 @@ public:
     /*!
      * Расcчитывает и записывает в файл конфигурацию системы в последующие моменты времени
      */
-    void record();
+    void record(std::string _path);
 
     void recordmove(int _numfile, int _nFrame);
 

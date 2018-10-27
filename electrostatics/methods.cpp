@@ -2,7 +2,8 @@
 
 void NonIteractingDipoles::setDipoleMoment()
 {
-    dipolemoment = system->ksi * pow(2 * system->particles[0]->radius, 3) * system->environment->externalfield->electricfield / 8.0;
+//    dipolemoment = system->ksi * pow(2 * system->particles[0]->radius, 3) * system->environment->externalfield->electricfield / 8.0;
+    dipolemoment = system->ksi * system->environment->externalfield->electricfield;
     for (int i = 0; i < system->numParticles; i++)
     {
         system->particles[i]->dipolemoment = dipolemoment;
@@ -56,7 +57,8 @@ Matrix SelfConsistentDipoles::getInteractionsMatrix()
         }
     }
 
-    return ((8.0 / (system->ksi * pow(system->particles[0]->radius * 2, 3)))) * mathematics::getUnitMatrix(3 * system->numParticles) - Block_Matrix;
+    return (1.0 / (system->ksi)) * mathematics::getUnitMatrix(3 * system->numParticles) - Block_Matrix;
+//    return ((8.0 / (system->ksi * pow(system->particles[0]->radius * 2, 3)))) * mathematics::getUnitMatrix(3 * system->numParticles) - Block_Matrix;
 }
 
 void SelfConsistentDipoles::setDipoleMoment()
@@ -75,8 +77,7 @@ void SelfConsistentDipoles::setDipoleMoment()
     {
         for(int j = 0; j < 3; j++)
         {
-//            system->particles[i]->dipolemoment(j) = Dipolemoment(k);
-            system->particles[i]->dipolemoment(j) = Dipolemoment(k) / system->dipolemoment0.norm();
+            system->particles[i]->dipolemoment(j) = Dipolemoment(k);
             k++;
         }
     }
