@@ -89,13 +89,13 @@ void MolecularDinamic::record(std::string _path)
         r_[nParticle] = system->particles[nParticle]->getCoordinate();
     }
 
-    path = _path + std::to_string(0) + prop->filetype;
+//    path = _path + std::to_string(0) + prop->filetype;
+    path = _path + prop->filetype;
     out.open(path, std::ios::out | std::ios::binary);
     for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
     {
         out << system->particles[nParticle]->state;
     }
-    out.close();
 
     rad = 0.0;
     srand(time(NULL));
@@ -109,8 +109,114 @@ void MolecularDinamic::record(std::string _path)
             system->environment->externalfield->electricfield = system->environment->externalfield->getElectricField(i);
         }
 
-        path = _path + std::to_string(i) + prop->filetype;
-        out.open(path, std::ios::out | std::ios::binary);
+//        path = _path + std::to_string(i) + prop->filetype;
+//        out.open(path, std::ios::out | std::ios::binary);
+
+        for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+        {
+            R_(nParticle, 0) = system->particles[nParticle]->getCoordinate()(0);
+            R_(nParticle, 1) = system->particles[nParticle]->getCoordinate()(1);
+            R_(nParticle, 2) = system->particles[nParticle]->getCoordinate()(2);
+        }
+
+        if (nameThermostat == "langevin")
+        {
+            setCoordinateLangevin();
+            setVelocityLangevin();
+        }
+        else if (nameThermostat == "brownian")
+        {
+            setVelocityBrownian();
+            setCoordinateBrownian();
+        }
+        else
+        {
+            std::cout << "NameThermostatError" << std::endl;
+        }
+
+        rad /= system->numParticles;
+
+//        for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+//        {
+//            if (bool(i % k == 0))
+//            {
+//                out << system->particles[nParticle]->state;
+//            }
+//            else
+//            {
+//                path = _path + std::to_string(i) + prop->filetype;
+//                c = path.c_str();
+//                remove(c);
+//            }
+//        }
+//        out.close();
+        for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+        {
+            out << system->particles[nParticle]->state;
+        }
+
+        if (i == numFrames / 4.0)
+        {
+            std::cout << "0.25" << std::endl;
+        }
+        if (i == numFrames / 2.0)
+        {
+            std::cout << "0.5" << std::endl;
+        }
+        if (i == 3.0 * numFrames / 4.0)
+        {
+            std::cout << "0.75" << std::endl;
+        }
+        std::cout << "N = " << i << "  v1 = " << system->particles[0]->getVelocity().norm() << "  v2 = " << system->particles[1]->getVelocity().norm() <<"  v3 = " << system->particles[2]->getVelocity().norm() << std::endl;
+        if (system->particles[0]->getVelocity().norm() > 100 || system->particles[1]->getVelocity().norm() > 100 || system->particles[2]->getVelocity().norm() > 100)
+        {
+            break;
+        }
+    }
+    out.close();
+}
+
+void MolecularDinamic::recordVMD(std::string _path)
+{
+    computeKoef();
+
+    r_.resize(system->numParticles);            // Радиус-вектор частицы в настоящий момент времени
+    rp_.resize(system->numParticles);           // Радиус-вектор частицы в предыдущий момент времени
+    R_.resize(system->numParticles, 3);
+
+    for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+    {
+        rp_[nParticle] = system->particles[nParticle]->getCoordinate();
+        r_[nParticle] = system->particles[nParticle]->getCoordinate();
+    }
+
+    path = _path + ".lammpstrj";
+    out.open(path, std::ios::out | std::ios::binary);
+    outputline = "ITEM: TIMESTEP\n" + std::to_string(0) + "\nITEM: NUMBER OF ATOMS\n" + std::to_string(system->numParticles) + "\nITEM: BOX BOUNDS pp pp\n-50 50\n-50 50\n0.0 0.0\nITEM: ATOMS id x y\n";
+    out << outputline;
+    for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+    {
+        outputline = std::to_string(system->particles[nParticle]->state->number) + " " + std::to_string(system->particles[nParticle]->state->r(0)) + " " + std::to_string(system->particles[nParticle]->state->r(1)) + "\n";
+        out << outputline;
+    }
+
+    rad = 0.0;
+    srand(time(NULL));
+    for (int i = 1; i < numFrames; i++)
+    {
+//        k = (0.016 / prop->timestep * 1e-4);            // проверка для записи определённых файлов
+        k = 20;
+
+        if (bool(i % k == 0))
+        {
+            outputline = "ITEM: TIMESTEP\n" + std::to_string(i) + "\nITEM: NUMBER OF ATOMS\n" + std::to_string(system->numParticles) + "\nITEM: BOX BOUNDS pp pp pp\n-50 50\n-50 50\n0.0 0.0\nITEM: ATOMS id x y\n";
+            out << outputline;
+        }
+
+        if (accuracyEnergy != "average")
+        {
+            system->environment->externalfield->electricfield = system->environment->externalfield->getElectricField(i);
+        }
 
         for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
         {
@@ -140,16 +246,10 @@ void MolecularDinamic::record(std::string _path)
         {
             if (bool(i % k == 0))
             {
-                out << system->particles[nParticle]->state;
-            }
-            else
-            {
-                path = _path + std::to_string(i) + prop->filetype;
-                c = path.c_str();
-                remove(c);
+                outputline = std::to_string(system->particles[nParticle]->state->number) + " " + std::to_string(system->particles[nParticle]->state->r(0)) + " " + std::to_string(system->particles[nParticle]->state->r(1)) + "\n";
+                out << outputline;
             }
         }
-        out.close();
 
         if (i == numFrames / 4.0)
         {
@@ -169,6 +269,7 @@ void MolecularDinamic::record(std::string _path)
             break;
         }
     }
+    out.close();
 }
 
 void MolecularDinamic::recordmove(int _numfile, int _nFrame)

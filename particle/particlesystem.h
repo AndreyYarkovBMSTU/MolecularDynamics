@@ -29,6 +29,7 @@ struct ParticleSystem
     double friction;                         ///< Коэффициент внутреннего трения
     double diffusion;
     Vector dipolemoment0;                    ///< Дипольный момент уединённой частицы
+    Vector dipolemoment0_;                  ///< Обезразмеренный
     Vector extra_electricfield;
     std::vector<Particle*> particles;       ///< Контейнер частиц
     Environment* environment;               ///< Среда

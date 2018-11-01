@@ -27,6 +27,7 @@ private:
     double koef_randForce;
     double koef_dipole;
 
+    Vector center;
     Vector v;
     Vector f;
     Vector f_;
@@ -114,6 +115,7 @@ public:
      * Расcчитывает и записывает в файл конфигурацию системы в последующие моменты времени
      */
     void record(std::string _path);
+    void recordVMD(std::string _path);
 
     void recordmove(int _numfile, int _nFrame);
 

@@ -15,6 +15,7 @@ private:
     double U;
     double U_;
     double phi;
+    double amplitude;
     double Ex_;
     double Ey_;
     Vector r_;

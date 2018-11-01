@@ -14,6 +14,7 @@ void ParticleSystem::setProperties()
     friction = 6.0 * M_PI * particles[0]->radius * environment->material->viscosity;
     diffusion = prop->k * prop->temperature / friction;
     dipolemoment0 = prop->koef_dipole * environment->externalfield->electricfield * ksi * pow(2 * particles[0]->radius, 3) / 8.0;
+    dipolemoment0_ = environment->externalfield->electricfield * ksi;
 }
 
 /*!
@@ -39,18 +40,28 @@ Vector ParticleSystem::getElectricField(int _nParticle)
 
 Energy ParticleSystem::getSelfEnergy(int _nParticle)
 {
+    setProperties();
+
 //    return (particles[_nParticle]->dipolemoment.dot(particles[_nParticle]->dipolemoment) - dipolemoment0.dot(dipolemoment0)) / (2 * pow(particles[0]->radius, 3));
-    return ((particles[_nParticle]->dipolemoment.dot(particles[_nParticle]->dipolemoment)) - 1.0) / 8.0;
+    return ((particles[_nParticle]->dipolemoment.dot(particles[_nParticle]->dipolemoment)) - dipolemoment0_.dot(dipolemoment0_)) / 2.0;
 }
 
 Energy ParticleSystem::getInteractionEnergy(int _nParticle)
 {
+    setProperties();
+
     return - (particles[_nParticle]->dipolemoment).dot(getElectricField(_nParticle)) / 2.0;
 }
 
 Energy ParticleSystem::getInductionEnergy(int _nParticle)
 {
-    dipolemoment0 = environment->externalfield->electricfield * ksi * pow(2 * particles[0]->radius, 3) / 8.0;
+    setProperties();
 
-    return - (environment->externalfield->electricfield.dot(particles[_nParticle]->dipolemoment) - environment->externalfield->electricfield.dot(dipolemoment0)) / 2.0;
+    return - (environment->externalfield->electricfield.dot(particles[_nParticle]->dipolemoment - dipolemoment0_)) / 2.0;
 }
+//Energy ParticleSystem::getInductionEnergy(int _nParticle)
+//{
+//    dipolemoment0 = environment->externalfield->electricfield * ksi * pow(2 * particles[0]->radius, 3) / 8.0;
+
+//    return - (environment->externalfield->electricfield.dot(particles[_nParticle]->dipolemoment) - environment->externalfield->electricfield.dot(dipolemoment0)) / 2.0;
+//}

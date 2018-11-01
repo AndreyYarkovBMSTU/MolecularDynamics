@@ -8,7 +8,7 @@ class Properties
 {
 public:
     int numFrames = 50000;                   ///< Число кадров
-    int numAngles = 20;                     ///< Число шагов при усреднении при вращении
+    int numAngles = 40;                     ///< Число шагов при усреднении при вращении
     double radius = 1e-6;
     double timestep = 1e-3;           ///< Временной шаг
     double temperature = 293.15 * phys::K();      ///< Температура

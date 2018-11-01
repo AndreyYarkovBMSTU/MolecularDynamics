@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include "header.h"
 #include "electrostatics/externalfields.h"
 #include "electrostatics/methods.h"
@@ -22,10 +22,12 @@ int main()
 
     Object* obj = new Object(prop->radius);
 
+//    State* state1 = new State(1, Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
+//    State* state2 = new State(2, Vector(2.0, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
     State* state1 = new State(1, Vector(-2.0, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
-    State* state2 = new State(2, Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
+    State* state2 = new State(2, Vector(0.0, 2.0, 0.0), Vector(0.0, 0.0, 0.0));
     State* state3 = new State(3, Vector(2.0, 0.0, 0.0), Vector(0.0, 0.0, 0.0));
-//    State* state4 = new State(4, Vector(-4.0, 3.0, 0.0), Vector(0.0, 0.0, 0.0));
+//    State* state4 = new State(4, Vector(0.0, -2.0, 0.0), Vector(0.0, 0.0, 0.0));
 //    State* state5 = new State(5, Vector(-6.0, 1.0, 0.0), Vector(0.0, 0.0, 0.0));
 //    State* state6 = new State(6, Vector(-1.1, 4.0, 0.0), Vector(0.0, 0.0, 0.0));
 //    State* state7 = new State(7, Vector(1.1, 2.0, 0.0), Vector(0.0, 0.0, 0.0));
@@ -66,6 +68,7 @@ int main()
     Methods* method = new SelfConsistentDipoles(system, prop);
 
     method->setDipoleMoment();
+    std::cout << system->particles[0]->dipolemoment << std::endl;
 
     std::cout << "T / timestep: " << (2 * M_PI / system->environment->externalfield->omega) / prop->timestep << std::endl;
 
@@ -77,19 +80,28 @@ int main()
                                                               "LJ",
                                                               "exact"); //"average"
 
-    moleculardinamic->record(prop->path + "time13/");
+//    moleculardinamic->record(prop->path + "MD/MD");
+
+//    Interaction* interaction = new Interaction(system, method, prop, "average");
+//    interaction->recordPotentials(1000, "induction");
+//    interaction->recordPotentials(1000, "interaction");
+//    interaction->recordPotentials(1000, "self");
+//    interaction->recordPotentials(1000, "ipl3");
+
+    moleculardinamic->recordVMD(prop->path + "vmd/vmdTriple");
 
     std::cout << "First modeling finished" << std::endl;
 
     externalfield->omega = externalfield->omega / (moleculardinamic->t0 * prop->koef_omega);
 
-    system->particles[0]->setCoordinate(Vector(-1.5, 0.0, 0.0));
-    system->particles[0]->setVelocity(Vector(0.0, 0.0, 0.0));
-    system->particles[1]->setCoordinate(Vector(1.5, 0.0, 0.0));
-    system->particles[1]->setVelocity(Vector(0.0, 0.0, 0.0));
-    system->particles[2]->setCoordinate(Vector(2.0, 4.0, 0.0));
-    system->particles[2]->setVelocity(Vector(0.0, 0.0, 0.0));
-
+//    system->particles[0]->setCoordinate(Vector(-2, 0.0, 0.0));
+//    system->particles[0]->setVelocity(Vector(0.0, 0.0, 0.0));
+//    system->particles[1]->setCoordinate(Vector(0.0, 2.0, 0.0));
+//    system->particles[1]->setVelocity(Vector(0.0, 0.0, 0.0));
+//    system->particles[2]->setCoordinate(Vector(2.0, 0.0, 0.0));
+//    system->particles[2]->setVelocity(Vector(0.0, 0.0, 0.0));
+//    system->particles[3]->setCoordinate(Vector(0.0, -2.0, 0.0));
+//    system->particles[3]->setVelocity(Vector(0.0, 0.0, 0.0));
 
     method->setDipoleMoment();
 
@@ -123,6 +135,8 @@ int main()
     std::cout << "m/gamma: " << system->particles[0]->mass / system->friction << std::endl;
     std::cout << "D: " << system->diffusion << std::endl;
     std::cout << "dipolemoment0: " << system->dipolemoment0.norm() << std::endl;
+    std::cout << "dipolemoment0_: " << system->dipolemoment0_.norm() << std::endl;
+    std::cout << "ksi: " << system->ksi << std::endl;
 
 //    moleculardinamic->computer(0, 10000);
 
