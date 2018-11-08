@@ -22,6 +22,13 @@ struct Energy
  */
 struct ParticleSystem
 {
+private:
+    std::vector<double> f;
+    double kronec_ij;
+    double kronec_ik;
+    double kronec_jk;
+    Vector r_;
+public:
     int numParticles;                       ///< Число частиц
     double reinolds;
     double v_thermal;                       ///< Тепловая скорость
@@ -58,10 +65,10 @@ struct ParticleSystem
 
     Vector getElectricField(int _nParticle);
 
+    Vector getForce(int _nParticle);
+
     Energy getSelfEnergy(int _nParticle);
-
     Energy getInteractionEnergy(int _nParticle);
-
     Energy getInductionEnergy(int _nParticle);
 };
 

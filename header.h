@@ -13,6 +13,7 @@
 #include "namespase/mathematics.h"
 
 using namespace phys;
+using namespace mathematics;
 using namespace std;
 
 typedef Eigen::Vector3d Vector;

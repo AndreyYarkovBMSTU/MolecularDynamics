@@ -21,7 +21,6 @@ private:
     int k;
     int numParticles;
     double rad;
-    double tau;                         ///< Коэффициент обезразмеривания по времени
     double koef_demping;
     double koef_LenJon;
     double koef_randForce;
@@ -38,6 +37,7 @@ private:
     Matrix R_;
     vector<Vector> r_;            // Радиус-вектор частицы в настоящий момент времени
     vector<Vector> rp_;           // Радиус-вектор частицы в предыдущий момент времени
+    vector<double> phi0;
     Matrix _R;
     std::string path;
     std::ofstream out;
@@ -45,6 +45,7 @@ private:
     const char * c;
 public:
     int numFrames;
+    double tau;                         ///< Коэффициент обезразмеривания по времени
     double t0;                          ///< Обезразмеренное время
     ParticleSystem* system;
     Thermostat* thermostat;             ///< Термостат
@@ -73,7 +74,7 @@ public:
 
         tau = 2 * system->particles[0]->radius / system->v_thermal;
         t0 = prop->timestep / tau;
-        system->environment->externalfield->omega = system->environment->externalfield->omega * t0 * prop->koef_omega;
+        system->environment->externalfield->omega = system->environment->externalfield->omega * tau * prop->koef_omega;
 
         interaction = new Interaction(system, method, prop, _accuracyEnergy);
 
@@ -115,6 +116,7 @@ public:
      * Расcчитывает и записывает в файл конфигурацию системы в последующие моменты времени
      */
     void record(std::string _path);
+    void recordtest(std::string _path);
     void recordVMD(std::string _path);
 
     void recordmove(int _numfile, int _nFrame);

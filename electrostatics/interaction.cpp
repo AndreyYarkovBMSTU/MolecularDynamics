@@ -3,9 +3,11 @@
 double Interaction::getGradEnergy(int _nParticle, int _nCoord)
 {
     system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord) + dr;
-    U_ = system->getInteractionEnergy(_nParticle).energy + system->getSelfEnergy(_nParticle).energy;
+//    U_ = system->getInteractionEnergy(_nParticle).energy + system->getSelfEnergy(_nParticle).energy;
+    U_ = system->getSelfEnergy(_nParticle).energy;
     system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord) - dr;
-    U_ = U_ - (system->getInteractionEnergy(_nParticle).energy + system->getSelfEnergy(_nParticle).energy);
+//    U_ = U_ - (system->getInteractionEnergy(_nParticle).energy + system->getSelfEnergy(_nParticle).energy);
+    U_ = U_ - system->getSelfEnergy(_nParticle).energy;
     system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord);
 
     return U_ / (2 * dr);
@@ -14,9 +16,11 @@ double Interaction::getGradEnergy(int _nParticle, int _nCoord)
 double Interaction::getGradAverageEnergy(int _nParticle, int _nCoord)
 {
     system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord) + dr;
-    U_ = (getAverageEnergy(_nParticle, "interaction") + getAverageEnergy(_nParticle, "self")) * prop->numAngles;
+//    U_ = (getAverageEnergy(_nParticle, "interaction") + getAverageEnergy(_nParticle, "self")) * prop->numAngles;
+    U_ = getAverageEnergy(_nParticle, "self") * prop->numAngles;
     system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord) - dr;
-    U_ = U_ - (getAverageEnergy(_nParticle, "interaction") + getAverageEnergy(_nParticle, "self")) * prop->numAngles;
+//    U_ = U_ - (getAverageEnergy(_nParticle, "interaction") + getAverageEnergy(_nParticle, "self")) * prop->numAngles;
+    U_ = U_ - getAverageEnergy(_nParticle, "self") * prop->numAngles;
     system->particles[_nParticle]->state->r(_nCoord) = r_(_nCoord);
 
     return U_ / (2 * dr);
@@ -28,14 +32,18 @@ Vector Interaction::getElectricForce(int _nParticle)
     {
         r_ = system->particles[_nParticle]->getCoordinate();
 
-        return Vector(- getGradAverageEnergy(_nParticle, 0), - getGradAverageEnergy(_nParticle, 1), 0.0);
+//        return Vector(- getGradAverageEnergy(_nParticle, 0), - getGradAverageEnergy(_nParticle, 1), 0.0);
+        return (Vector(- getGradAverageEnergy(_nParticle, 0), - getGradAverageEnergy(_nParticle, 1), 0.0) + system->getForce(_nParticle));
+//        return system->getForce(_nParticle);
     }
     if (accuracyEnergy == "exact")
     {
         method->setDipoleMoment();
         r_ = system->particles[_nParticle]->getCoordinate();
 
-        return Vector(- getGradEnergy(_nParticle, 0), - getGradEnergy(_nParticle, 1), 0.0);
+//        return Vector(- getGradEnergy(_nParticle, 0), - getGradEnergy(_nParticle, 1), 0.0);
+        return (Vector(- getGradEnergy(_nParticle, 0), - getGradEnergy(_nParticle, 1), 0.0) + system->getForce(_nParticle));
+//        return system->getForce(_nParticle);
     }
 }
 
@@ -132,7 +140,7 @@ double Interaction::getAverageEnergy(int _nParticle, std::string _energytype)
     {
         for (int i = 0; i < prop->numAngles; i++)
         {
-            phi = i * 2 * M_PI / prop->numAngles;
+            phi = i * M_PI / prop->numAngles;
 //            amplitude = 1.0 - cos(2.0 * phi + M_PI) / 3.0;
             amplitude = 1.0;
 

@@ -38,6 +38,37 @@ Vector ParticleSystem::getElectricField(int _nParticle)
     return extra_electricfield;
 }
 
+Vector ParticleSystem::getForce(int _nParticle)
+{
+    f.resize(3);
+    f[0] = 0.0;
+    f[1] = 0.0;
+    f[2] = 0.0;
+    for (int nParticle = 0; nParticle < numParticles; nParticle++)
+    {
+        if (nParticle != _nParticle)
+        {
+            r_ = particles[nParticle]->getCoordinate() - particles[_nParticle]->getCoordinate();
+            for (int i = 0; i < 3; i++)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    kronec_ik = mathematics::getKronec(i, k);
+                    for (int j = 0; j < 3; j++)
+                    {
+                        kronec_ij = mathematics::getKronec(i, j);
+                        kronec_jk = mathematics::getKronec(j, k);
+
+                        f[j] += 3 * particles[_nParticle]->dipolemoment(i) * (particles[_nParticle]->dipolemoment(k) * (r_(j) * kronec_ik + r_(k) * kronec_ij - (5 * r_(i) * r_(j) * r_(k) / pow(r_.norm(), 2)))
+                                                                   + particles[_nParticle]->dipolemoment(j) * r_(i)) / pow(r_.norm(), 5);
+                    }
+                }
+            }
+        }
+    }
+    return Vector(f[0], f[1], f[2]);
+}
+
 Energy ParticleSystem::getSelfEnergy(int _nParticle)
 {
     setProperties();

@@ -24,7 +24,7 @@ public:
     {
 
     }
-    virtual Vector getElectricField(int _numAngle = 0) = 0;
+    virtual Vector getElectricField(int _numAngle = 0, double _timestep = 0) = 0;
 };
 
 /*!
@@ -42,7 +42,7 @@ public:
 
     }
 
-    Vector getElectricField(int _numAngle);
+    Vector getElectricField(int _numAngle, double _timestep);
 };
 
 class RotatingField : public ExternalFields
@@ -54,7 +54,7 @@ public:
 
     }
 
-    Vector getElectricField(int _numAngle);
+    Vector getElectricField(int _numAngle, double _timestep);
 };
 
 #endif // EXTERNALFIELDS_H

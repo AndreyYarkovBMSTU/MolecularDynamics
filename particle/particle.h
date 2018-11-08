@@ -13,6 +13,9 @@
  */
 struct Particle
 {
+private:
+    Vector n;
+public:
     double radius;
     double mass;                ///< Масса частицы
     Vector dipolemoment;        ///< Дипольный момент
@@ -44,6 +47,9 @@ struct Particle
  */
 struct Dipoloid : Particle
 {
+private:
+    Vector n;
+public:
     /*!
      * Конструктор класса Dipoloid
      */

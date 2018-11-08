@@ -106,7 +106,7 @@ void MolecularDinamic::record(std::string _path)
 
         if (accuracyEnergy != "average")
         {
-            system->environment->externalfield->electricfield = system->environment->externalfield->getElectricField(i);
+            system->environment->externalfield->electricfield = system->environment->externalfield->getElectricField(i, tau);
         }
 
 //        path = _path + std::to_string(i) + prop->filetype;
@@ -171,6 +171,55 @@ void MolecularDinamic::record(std::string _path)
         if (system->particles[0]->getVelocity().norm() > 100 || system->particles[1]->getVelocity().norm() > 100 || system->particles[2]->getVelocity().norm() > 100)
         {
             break;
+        }
+    }
+    out.close();
+}
+
+void MolecularDinamic::recordtest(std::string _path)
+{
+    computeKoef();
+
+    r_.resize(system->numParticles);            // Радиус-вектор частицы в настоящий момент времени
+    rp_.resize(system->numParticles);           // Радиус-вектор частицы в предыдущий момент времени
+    phi0.resize(system->numParticles);
+
+    R_.resize(system->numParticles, 3);
+
+    for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+    {
+        rp_[nParticle] = system->particles[nParticle]->getCoordinate();
+        r_[nParticle] = system->particles[nParticle]->getCoordinate();
+        phi0[nParticle] = atan(system->particles[nParticle]->getCoordinate()(1) / system->particles[nParticle]->getCoordinate()(0));
+        if (system->particles[nParticle]->getCoordinate()(1) == 0 && system->particles[nParticle]->getCoordinate()(0) < 0)
+        {
+            phi0[nParticle] = M_PI;
+        }
+    }
+
+    path = _path + prop->filetype;
+    out.open(path, std::ios::out | std::ios::binary);
+    for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+    {
+        out << system->particles[nParticle]->state;
+    }
+
+    double omega = 0.0563218;
+    srand(time(NULL));
+    for (int i = 1; i < numFrames; i++)
+    {
+        k = 1;
+
+        for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+        {
+            system->particles[nParticle]->setCoordinate(Vector(system->particles[nParticle]->getCoordinate().norm() * cos(phi0[nParticle] + omega * tau * i), system->particles[nParticle]->getCoordinate().norm() * sin(phi0[nParticle] + omega * tau * i), 0.0));
+            system->particles[nParticle]->setVelocity(system->particles[nParticle]->getCoordinate() - r_[nParticle]);
+            r_[nParticle] = system->particles[nParticle]->getCoordinate();
+        }
+
+        for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
+        {
+            out << system->particles[nParticle]->state;
         }
     }
     out.close();

@@ -78,9 +78,9 @@ int main()
                                                               "brownian",//"langevin"
                                                               "verle",
                                                               "LJ",
-                                                              "exact"); //"average"
+                                                              "average"); //"average"
 
-//    moleculardinamic->record(prop->path + "MD/MD");
+    moleculardinamic->record(prop->path + "MD/MDtripleAver");
 
 //    Interaction* interaction = new Interaction(system, method, prop, "average");
 //    interaction->recordPotentials(1000, "induction");
@@ -88,11 +88,12 @@ int main()
 //    interaction->recordPotentials(1000, "self");
 //    interaction->recordPotentials(1000, "ipl3");
 
-    moleculardinamic->recordVMD(prop->path + "vmd/vmdTriple");
+//    moleculardinamic->recordVMD(prop->path + "vmd/vmdTriple");
+//    moleculardinamic->recordtest(prop->path + "MD/MDtest");
 
     std::cout << "First modeling finished" << std::endl;
 
-    externalfield->omega = externalfield->omega / (moleculardinamic->t0 * prop->koef_omega);
+    externalfield->omega = externalfield->omega / (moleculardinamic->t0 * prop->koef_omega); // возвращение значения
 
 //    system->particles[0]->setCoordinate(Vector(-2, 0.0, 0.0));
 //    system->particles[0]->setVelocity(Vector(0.0, 0.0, 0.0));
@@ -131,6 +132,7 @@ int main()
 
     std::cout << "Reinolds: " << system->reinolds << std::endl;
     std::cout << "v_thermal: " << system->v_thermal << std::endl;
+    std::cout << "tau: " << moleculardinamic->tau << std::endl;
     std::cout << "t0: " << moleculardinamic->t0 << std::endl;
     std::cout << "m/gamma: " << system->particles[0]->mass / system->friction << std::endl;
     std::cout << "D: " << system->diffusion << std::endl;

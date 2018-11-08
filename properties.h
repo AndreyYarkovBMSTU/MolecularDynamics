@@ -14,10 +14,10 @@ public:
     double temperature = 293.15 * phys::K();      ///< Температура
     double k = 1.38e-23 * phys::J() / phys::K();        ///< Постоянная Больцмана
     double epsilon0 = 8.85 * 1e-12;             ///< Электрическая постоянная
-    double koef_omega = 1.0e-3;//1e2;
-    double koef_dipole = 75;      // используется в particlesystem
-    double koef_LenJon = 1e-20;
-    double koef_Brown = 15;
+    double koef_omega = 2.5 * 1e-3;//1.0e-3;//1e2;
+    double koef_dipole = 75.0;//75;      // используется в particlesystem
+    double koef_LenJon = 1e-19;
+    double koef_Brown = 15;//15;
     Material* particlematerial;             ///< Материал частиц
     Material* solvent;                      ///< Материал среды
     std::string path = "output/";       ///< Путь к файлу
