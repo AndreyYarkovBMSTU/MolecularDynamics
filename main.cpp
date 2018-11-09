@@ -78,11 +78,12 @@ int main()
                                                               "brownian",//"langevin"
                                                               "verle",
                                                               "LJ",
-                                                              "average"); //"average"
+                                                              "exact"); //"average"
 
-    moleculardinamic->record(prop->path + "MD/MDtripleAver");
+//    moleculardinamic->record(prop->path + "MD/MDtriple");
 
-//    Interaction* interaction = new Interaction(system, method, prop, "average");
+    Interaction* interaction = new Interaction(system, method, prop, "exact");
+    interaction->recordPlane("input/cluster/662.cluster", "input/cluster/points.cluster", "output/cluster/potentials.cluster", "output/cluster/electricfield.cluster");
 //    interaction->recordPotentials(1000, "induction");
 //    interaction->recordPotentials(1000, "interaction");
 //    interaction->recordPotentials(1000, "self");

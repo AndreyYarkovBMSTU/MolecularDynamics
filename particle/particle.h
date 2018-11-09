@@ -40,6 +40,7 @@ public:
     void setVelocity(Vector _v);
 
     virtual Vector getElectricField(Vector _r) = 0;
+    virtual double getPotential(Vector _r) = 0;
 };
 
 /*!
@@ -60,6 +61,7 @@ public:
     }
 
     Vector getElectricField(Vector _r);
+    double getPotential(Vector _r);
 };
 
 #endif // PARTICLE_H

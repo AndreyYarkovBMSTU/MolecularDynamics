@@ -9,7 +9,10 @@
 class Interaction
 {
 private:
-    int n;
+    int numpoints;
+    int numParticles;
+    int m;
+    int count;
     double average_energy;
     double dr;
     double U;
@@ -21,10 +24,20 @@ private:
     Vector r_;
     Vector force;
     Vector electricfield_;
+    Matrix Potentials;
+    Matrix ElectricField;
     std::string path;
     std::string path0;
     std::ofstream out;
     std::ofstream out0;
+    std::ifstream in;
+    std::vector<Vector> points;
+    std::vector<State*> states;
+    std::vector<Particle*> cluster;
+    ExternalFields* externalfield0;
+    Environment* environment0;
+    Methods* method0;
+    ParticleSystem* system0;
 public:
     ParticleSystem* system;
     Methods* method;
@@ -41,14 +54,14 @@ public:
     double getGradAverageEnergy(int _nParticle, int _nCoord);
 
     Vector getElectricForce(int _nParticle);
-
     Vector getElectricForceDipole(int _nParticle);
 
     void recordPotentials(int _numPoints, std::string _energytype);
-
     void recordEnergy(int _nParticle, std::string _energytype);
 
     double getAverageEnergy(int _nParticle, std::string _energytype);
+
+    void recordPlane(std::string _pathinParticles, std::string _pathinPoints, std::string _pathoutPot, std::string _pathoutEl);
 };
 
 #endif // INTERACTION_H

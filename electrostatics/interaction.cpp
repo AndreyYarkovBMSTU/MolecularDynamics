@@ -166,9 +166,156 @@ double Interaction::getAverageEnergy(int _nParticle, std::string _energytype)
                 average_energy += - system->dipolemoment0_.dot(system->dipolemoment0_) * pow((1.0 / (system->particles[1]->getCoordinate() - system->particles[0]->getCoordinate()).norm()), 3) / 4;
             }
         }
-        n = prop->numAngles;
+        numpoints = prop->numAngles;
     }
     system->environment->externalfield->electricfield = electricfield_;
 
-    return average_energy / n;
+    return average_energy / numpoints;
+}
+
+void Interaction::recordPlane(std::string _pathinParticles, std::string _pathinPoints, std::string _pathoutPot, std::string _pathoutEl)
+{
+    in.open(_pathinParticles, std::ios::in);
+    count = 0;
+    if (in.is_open())
+    {
+        char *str = new char [1024];
+        while (!in.eof())
+            {
+                in.getline(str, 1024, '\n');
+                count++;
+            }
+        delete[] str;
+        in.close();
+
+        std::cout << "Succes Particles" << std::endl;
+     }
+    else
+    {
+        std::cout << "Error Particles" << std::endl;
+    }
+
+    numParticles = count - 1;
+    states.resize(numParticles);
+    cluster.resize(numParticles);
+
+    in.open(_pathinParticles, std::ios::in);
+    if (in.is_open())
+    {
+        m = 3;
+        double **Part;
+        Part = new double*[numParticles];
+
+        for (int i = 0; i < numParticles; i++)
+        {
+            Part[i] = new double[m];
+            for (int j = 0; j < m; j++)
+            {
+                in >> Part[i][j];
+            }
+        }
+
+        for (int i = 0; i < numParticles; i++)
+        {
+            states[i] = new State(i + 1, Vector(Part[i][0], Part[i][1], 0.0), Vector(0.0, 0.0, 0.0));
+            cluster[i] = new Dipoloid(states[i], prop->particlematerial, prop->obj0);
+            std::cout << "Particle " << i+1 << " is created" << std::endl;
+        }
+
+        externalfield0 = new DirectedField(prop, Vector(1.0, 0.0, 0.0));
+        environment0 = new Environment(prop->solvent, externalfield0);
+        system0 = new ParticleSystem(environment0, prop);
+        for (int i = 0; i < numParticles; i++)
+        {
+            system0->setParticle(cluster[i]);
+        }
+
+       method0 = new SelfConsistentDipoles(system0, prop);
+       method0->setDipoleMoment();
+
+        for (int i = 0; i < numParticles; i++)
+        {
+            delete[] Part[i];
+        }
+        delete[] Part;
+
+        in.close();
+    }
+
+    in.open(_pathinPoints, std::ios::in);
+    count = 0;
+    if (in.is_open())
+    {
+        char *str = new char [1024];
+        while (!in.eof())
+            {
+                in.getline(str, 1024, '\n');
+                count++;
+                std::cout << "Point " << count << std::endl;
+            }
+        delete[] str;
+        in.close();
+
+        std::cout << "Succes Points" << std::endl;
+     }
+    else
+    {
+        std::cout << "Error Points" << std::endl;
+    }
+    numpoints = count - 1;;
+    m = 3;
+    points.resize(numpoints);
+
+    in.open(_pathinPoints, std::ios::in);
+    if (in.is_open())
+    {
+        double **Cent;
+        Cent = new double*[numpoints];
+        for (int i = 0; i < numpoints; i++)
+        {
+            Cent[i] = new double[m];
+        }
+
+        for (int i = 0; i < numpoints; i++)
+        {
+            for (int j = 0; j < m; j++)
+            {
+                in >> Cent[i][j];
+            }
+            points[i] = Vector(Cent[i][0], Cent[i][1], Cent[i][2]);
+        }
+
+        Potentials.resize(numpoints, 1);
+        Potentials.setZero(numpoints, 1);
+        ElectricField.resize(numpoints, 3);
+        ElectricField.setZero(numpoints, 3);
+
+        for (int i = 0; i < numpoints; i++)
+        {
+            for (int nParticle = 0; nParticle < numParticles; nParticle++)
+            {
+                Potentials(i, 0) += cluster[nParticle]->getPotential(points[i]);
+                ElectricField(i, 0) += cluster[nParticle]->getElectricField(points[i])(0);
+                ElectricField(i, 1) += cluster[nParticle]->getElectricField(points[i])(1);
+                ElectricField(i, 2) += cluster[nParticle]->getElectricField(points[i])(2);
+            }
+            std::cout << "N = " << i << " Potential = " <<Potentials(i, 0) << std::endl;
+        }
+
+        out.open(_pathoutPot, std::ios::out | std::ios::binary);
+        out << Potentials;
+        out.close();
+
+        out.open(_pathoutEl, std::ios::out | std::ios::binary);
+        out << ElectricField;
+        out.close();
+
+        for (int i = 0; i < numpoints; i++)
+        {
+            delete[] Cent[i];
+        }
+        delete[] Cent;
+
+        in.close();
+    }
 }

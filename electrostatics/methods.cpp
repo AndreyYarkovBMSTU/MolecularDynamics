@@ -13,26 +13,38 @@ void NonIteractingDipoles::setDipoleMoment()
 Matrix SelfConsistentDipoles::getBlock(Particle* particle1, Particle* particle2)
 {
     Block.resize(3, 3);
-    n_ab = (particle1->getCoordinate() - particle2->getCoordinate()) / (particle1->getCoordinate() - particle2->getCoordinate()).norm();
-    kronec_ab = mathematics::getKronec(particle1->state->number, particle2->state->number);
-
-    for (int i = 0; i < 3; i++)
+    if ((particle1->getCoordinate() - particle2->getCoordinate()).norm() != 0.0)
     {
-        for (int j = 0; j < 3; j++)
-        {
-            kronec_ij = mathematics::getKronec(i, j);
+        n_ab = (particle1->getCoordinate() - particle2->getCoordinate()) / (particle1->getCoordinate() - particle2->getCoordinate()).norm();
+        kronec_ab = mathematics::getKronec(particle1->state->number, particle2->state->number);
 
-            if (kronec_ab == 1)
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
             {
-                Block(i, j) = 0;
-            }
-            else
-            {
-                Block(i, j) = (3 * n_ab(i) * n_ab(j) - kronec_ij) * (1 - kronec_ab) / pow((particle1->getCoordinate() - particle2->getCoordinate()).norm(), 3);
+                kronec_ij = mathematics::getKronec(i, j);
+
+                if (kronec_ab == 1)
+                {
+                    Block(i, j) = 0;
+                }
+                else
+                {
+                    Block(i, j) = (3 * n_ab(i) * n_ab(j) - kronec_ij) * (1 - kronec_ab) / pow((particle1->getCoordinate() - particle2->getCoordinate()).norm(), 3);
+                }
             }
         }
     }
-
+    else
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                Block(i, j) = 0;
+            }
+        }
+    }
     return Block;
 }
 

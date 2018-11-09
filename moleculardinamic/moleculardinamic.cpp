@@ -106,7 +106,7 @@ void MolecularDinamic::record(std::string _path)
 
         if (accuracyEnergy != "average")
         {
-            system->environment->externalfield->electricfield = system->environment->externalfield->getElectricField(i, tau);
+            system->environment->externalfield->electricfield = system->environment->externalfield->getElectricField(i, t0);
         }
 
 //        path = _path + std::to_string(i) + prop->filetype;
@@ -212,7 +212,7 @@ void MolecularDinamic::recordtest(std::string _path)
 
         for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
         {
-            system->particles[nParticle]->setCoordinate(Vector(system->particles[nParticle]->getCoordinate().norm() * cos(phi0[nParticle] + omega * tau * i), system->particles[nParticle]->getCoordinate().norm() * sin(phi0[nParticle] + omega * tau * i), 0.0));
+            system->particles[nParticle]->setCoordinate(Vector(system->particles[nParticle]->getCoordinate().norm() * cos(phi0[nParticle] + omega * t0 * i), system->particles[nParticle]->getCoordinate().norm() * sin(phi0[nParticle] + omega * t0 * i), 0.0));
             system->particles[nParticle]->setVelocity(system->particles[nParticle]->getCoordinate() - r_[nParticle]);
             r_[nParticle] = system->particles[nParticle]->getCoordinate();
         }
@@ -264,7 +264,7 @@ void MolecularDinamic::recordVMD(std::string _path)
 
         if (accuracyEnergy != "average")
         {
-            system->environment->externalfield->electricfield = system->environment->externalfield->getElectricField(i);
+            system->environment->externalfield->electricfield = system->environment->externalfield->getElectricField(i, t0);
         }
 
         for (int nParticle = 0; nParticle < system->numParticles; nParticle++)
